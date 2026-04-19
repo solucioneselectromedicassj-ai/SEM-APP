@@ -1227,7 +1227,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             rows = fetchall(c); conn.close()
             self.send_json(rows)
         elif p == "/api/historial_cliente":
-            from urllib.parse import parse_qs
             cliente = qs.get("cliente",[""])[0]
             conn = db(); c = conn.cursor()
             c.execute(qmark("SELECT * FROM historial_equipos WHERE cliente=? ORDER BY fecha DESC, id DESC"), (cliente,))
@@ -1360,7 +1359,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             rows = fetchall(c); conn.close()
             self.send_json(rows)
         elif p == "/api/historial_cliente":
-            from urllib.parse import parse_qs
             qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
             cliente = qs.get("cliente",[""])[0]
             conn = db(); c = conn.cursor()
@@ -1435,7 +1433,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             rows = fetchall(c); conn.close()
             self.send_json(rows)
         elif p == "/api/historial_cliente":
-            from urllib.parse import parse_qs
             qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
             cliente = qs.get("cliente",[""])[0]
             conn = db(); c = conn.cursor()
