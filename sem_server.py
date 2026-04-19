@@ -1171,6 +1171,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = urlparse(self.path).path
+        qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
         if p in ("/","/index.html"):
             self.send_bytes(HTML.encode("utf-8"),"text/html; charset=utf-8")
         elif p == "/logo":
@@ -1227,7 +1228,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json(rows)
         elif p == "/api/historial_cliente":
             from urllib.parse import parse_qs
-            qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
             cliente = qs.get("cliente",[""])[0]
             conn = db(); c = conn.cursor()
             c.execute(qmark("SELECT * FROM historial_equipos WHERE cliente=? ORDER BY fecha DESC, id DESC"), (cliente,))
