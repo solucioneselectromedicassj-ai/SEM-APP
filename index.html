@@ -317,6 +317,18 @@ td{padding:.4rem .52rem;vertical-align:middle}
         <div class="mcard mo" onclick="openMod('ordenes')"><div class="mtop"></div><div class="mico">🔧</div><h4>Órdenes Trabajo</h4><div class="mcnt" id="mc-ordenes">—</div></div>
         <div class="mcard mb" onclick="openMod('bajas')"><div class="mtop"></div><div class="mico">🗑️</div><h4>Bajas RIC-44</h4><div class="mcnt" id="mc-bajas">—</div></div>
       </div>
+      <!-- Barra fija de filtros para equipos, visible solo cuando curMod=equipos -->
+      <div id="eqFilterBar" style="display:none;background:var(--bg);padding:.4rem 0;position:sticky;top:0;z-index:20;border-bottom:2px solid var(--az3);margin-bottom:.4rem;box-shadow:0 2px 6px rgba(0,0,0,.07)">
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;padding:0 .1rem">
+          <select id="eqFamSel" class="fi" style="flex:1;min-width:110px;font-size:.74rem" onchange="filtrarFamiliaEq(this.value)">
+            <option value="">📂 Todas las familias</option>
+          </select>
+          <input id="eqBuscador" class="fi" style="flex:2;min-width:120px;font-size:.74rem" type="text" placeholder="🔍 Buscar equipo, serie, marca..." oninput="ft('eqT',this.value)">
+        </div>
+        <div id="eqFamLabel" style="display:none;font-size:.68rem;color:var(--az);font-weight:600;padding:.2rem .1rem 0">
+          📂 <span id="eqFamLabelTxt"></span> · <button class="ab" style="font-size:.6rem" onclick="filtrarFamiliaEq('')">✕ Ver todas</button>
+        </div>
+      </div>
       <div id="modContent"></div>
     </div>
 
@@ -738,6 +750,9 @@ async function openMod(type){
   document.querySelectorAll('.mcard').forEach(c=>c.classList.remove('active-mod'));
   const map={tareas:'mt',equipos:'me',expedientes:'mexp',ric58:'mr',compras:'mc',actas:'ma',ordenes:'mo',bajas:'mb'};
   document.querySelectorAll('.mcard.'+map[type]).forEach(c=>c.classList.add('active-mod'));
+  // Barra de filtros: solo visible en equipos
+  const fb=g('eqFilterBar');
+  if(fb)fb.style.display=type==='equipos'?'block':'none';
   const tc=g('modContent');
   tc.innerHTML=`<div style="color:var(--dim);font-size:.78rem;padding:.4rem">Cargando...</div>`;
   try{
@@ -864,6 +879,18 @@ async function modEq(tc){
   // Familias: primera palabra del nombre
   const familias=[...new Set(rows.map(e=>(es(e.descrip)||'').trim().split(/\s+/)[0]||'Otros'))].sort();
   const shown=_eqFamilia?rows.filter(e=>(es(e.descrip)||'').trim().toUpperCase().startsWith(_eqFamilia.toUpperCase())):rows;
+  // Poblar la barra sticky externa
+  const famSel=g('eqFamSel');
+  if(famSel){
+    famSel.innerHTML=`<option value="">📂 Todas (${rows.length})</option>`
+      +familias.map(f=>`<option value="${f}" ${_eqFamilia===f?'selected':''}>${f} (${rows.filter(e=>(es(e.descrip)||'').trim().toUpperCase().startsWith(f.toUpperCase())).length})</option>`).join('');
+  }
+  const eqBusc=g('eqBuscador');
+  if(eqBusc)eqBusc.value='';
+  const famLbl=g('eqFamLabel');
+  const famLblTxt=g('eqFamLabelTxt');
+  if(famLbl){famLbl.style.display=_eqFamilia?'block':'none';}
+  if(famLblTxt)famLblTxt.textContent=_eqFamilia?`${_eqFamilia} · ${shown.length} equipos`:'';
   tc.innerHTML=`
     <div class="tbar">
       <button class="btn baz2" onclick="openForm('equipo')">+ Agregar</button>
@@ -871,14 +898,6 @@ async function modEq(tc){
       <span class="bx baz" style="font-size:.62rem">${rows.filter(e=>!e.tipoEq||e.tipoEq==='Hospital').length} hosp.</span>
       <span class="bx bpu" style="font-size:.62rem">${rows.filter(e=>e.tipoEq==='Comodato').length} comod.</span>
     </div>
-    <div class="tbar" style="gap:.3rem;flex-wrap:wrap">
-      <select class="fi" style="flex:1;min-width:120px" onchange="filtrarFamiliaEq(this.value)">
-        <option value="">📂 Todas (${rows.length})</option>
-        ${familias.map(f=>`<option value="${f}" ${_eqFamilia===f?'selected':''}>${f} (${rows.filter(e=>(es(e.descrip)||'').trim().toUpperCase().startsWith(f.toUpperCase())).length})</option>`).join('')}
-      </select>
-      <input class="fi" style="flex:2;min-width:130px" type="text" placeholder="Buscar equipo, serie, marca..." oninput="ft('eqT',this.value)">
-    </div>
-    ${_eqFamilia?`<div style="font-size:.7rem;color:var(--az);margin-bottom:.35rem;font-weight:600">📂 <b>${_eqFamilia}</b> · ${shown.length} equipos <button class="ab" style="font-size:.62rem;margin-left:.3rem" onclick="filtrarFamiliaEq('')">✕ Ver todas</button></div>`:''}
     <div class="tw"><table id="eqT">
       <thead><tr><th>Equipo / Marca · Serie</th><th>Tipo</th><th>Estado</th><th>Próx.Mant</th><th>Días</th><th>Garantía</th><th></th></tr></thead>
       <tbody>${shown.map(e=>{
@@ -905,10 +924,10 @@ async function modEq(tc){
 }
 function filtrarFamiliaEq(val){
   _eqFamilia=val;
-  // Mantener posición — recargar módulo sin volver al tope
-  const cont=document.getElementById('modContent');
-  const scrollY=cont?cont.scrollTop:0;
-  openMod('equipos').then(()=>{if(cont)cont.scrollTop=scrollY;});
+  // Limpiar buscador al cambiar familia
+  const busc=g('eqBuscador');if(busc)busc.value='';
+  // Recargar sin perder posición en pantalla
+  openMod('equipos');
 }
 
 async function iniciarBajaEquipo(id){
