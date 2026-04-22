@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#003d82">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ÁREA 6">
+<link rel="manifest" id="mfst">
+<title>ÁREA 6 · Ingeniería Clínica</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --az:#003d82;--az2:#0056b3;--az3:#e8f0fe;
+  --bg:#f0f2f8;--s1:#fff;--s2:#f8f9ff;--s3:#eef0f8;
+  --txt:#1a1a2e;--dim:#6b7280;--brd:#dde1f0;
+  --ro:#d32f2f;--roli:#fff0f0;--roba:#ffd5d5;
+  --na:#e65100;--nali:#fff8f0;--naba:#ffd9b3;
+  --ve:#1b5e20;--veli:#f0fff4;--veba:#b3f0c0;--ve2:#2e7d32;
+  --cy:#006064;--pu:#6a1b9a;--am:#f59e0b;
+  --sh:0 2px 8px rgba(0,0,0,.1);--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--az);border-radius:3px}
+
+/* ── LOGIN ── */
+#loginScr{position:fixed;inset:0;background:linear-gradient(160deg,var(--az),#0056b3);display:flex;align-items:center;justify-content:center;z-index:999}
+.lbox{background:#fff;border-radius:20px;padding:2rem 1.6rem;width:min(340px,94vw);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.llogo{text-align:center;margin-bottom:1.4rem}
+.lbig{width:72px;height:72px;background:var(--az);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:900;color:#fff;box-shadow:0 4px 16px rgba(0,61,130,.4)}
+.llogo h2{margin-top:.6rem;font-size:1rem;color:var(--dim)}
+.llogo p{font-size:.72rem;color:var(--dim)}
+.ubtn{width:100%;padding:.85rem 1rem;background:var(--s2);border:1.5px solid var(--brd);border-radius:12px;color:var(--txt);font-size:.9rem;cursor:pointer;margin-bottom:.5rem;display:flex;align-items:center;gap:.7rem;transition:all .2s;text-align:left}
+.ubtn:hover,.ubtn:active{background:var(--az3);border-color:var(--az)}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0}
+
+/* ── APP ── */
+#app{display:none;flex-direction:column;height:100dvh}
+#hdr{background:var(--az);padding:.45rem .7rem;display:flex;align-items:center;gap:.45rem;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hlogo{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;color:#fff;border:1.5px solid rgba(255,255,255,.35);flex-shrink:0}
+.htit{font-size:.78rem;font-weight:700;line-height:1.2;flex-shrink:0;color:#fff}
+.htit small{color:rgba(255,255,255,.75);font-weight:400;font-size:.64rem;display:block}
+.hsp{flex:1}
+.hib{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:.3rem .5rem;cursor:pointer;font-size:.8rem;flex-shrink:0;transition:background .15s}
+.hib:hover,.hib:active{background:rgba(255,255,255,.3)}
+
+/* ── MAIN ── */
+#main{flex:1;overflow-y:auto;overflow-x:hidden;padding:.7rem;-webkit-overflow-scrolling:touch}
+#alertBan{background:var(--roli);border:1.5px solid var(--roba);border-radius:10px;padding:.5rem .8rem;margin-bottom:.6rem;font-size:.74rem;color:var(--ro);display:none;font-weight:600}
+
+/* ── BREADCRUMB ── */
+#breadcrumb{display:none;align-items:center;gap:.3rem;margin-bottom:.55rem;font-size:.72rem;color:var(--dim);flex-wrap:wrap}
+#breadcrumb .bcrumb{cursor:pointer;color:var(--az);font-weight:600}
+#breadcrumb .bcrumb:hover{text-decoration:underline}
+#breadcrumb .bsep{color:var(--brd)}
+
+/* ── VOLVER BTN ── */
+.volver{background:var(--az);color:#fff;border:none;border-radius:8px;padding:.38rem .75rem;cursor:pointer;font-size:.76rem;font-weight:700;display:inline-flex;align-items:center;gap:.3rem;margin-bottom:.6rem;transition:background .15s}
+.volver:active{background:var(--az2)}
+
+/* ── SECTION TITLE ── */
+.sectit{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:.55rem;display:flex;align-items:center;gap:.4rem}
+.sectit span{font-size:1rem}
+
+/* ── DASHBOARD grid ── */
+#dashView{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+
+/* ── SERVICE/SUBSERVICE CARDS ── */
+.scard{background:var(--s1);border:1.5px solid var(--brd);border-radius:var(--r);padding:.9rem .75rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.scard:active{transform:scale(.97)}
+.scard .strip{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--r) var(--r) 0 0}
+.scard.ok .strip{background:var(--ve2)}.scard.al .strip{background:var(--ro)}.scard.wn .strip{background:var(--na)}
+.scard .stlbl{font-size:.61rem;font-weight:700;margin-bottom:.3rem}
+.scard.ok .stlbl{color:var(--ve2)}.scard.al .stlbl{color:var(--ro)}.scard.wn .stlbl{color:var(--na)}
+.scard .ico{font-size:1.5rem;margin-bottom:.28rem}
+.scard h3{font-size:.72rem;font-weight:700;line-height:1.3;margin-bottom:.4rem;color:var(--txt)}
+.scard .cnts{display:flex;gap:.28rem;flex-wrap:wrap}
+.bx{border-radius:20px;padding:.12rem .42rem;font-size:.6rem;font-weight:700}
+.baz{background:var(--az3);color:var(--az);border:1px solid #b3c8f8}
+.bro{background:var(--roli);color:var(--ro);border:1px solid var(--roba)}
+.bna{background:var(--nali);color:var(--na);border:1px solid var(--naba)}
+.bgr2{background:var(--veli);color:var(--ve2);border:1px solid var(--veba)}
+.bdim{background:var(--s3);color:var(--dim);border:1px solid var(--brd)}
+.bpu{background:#f3e5ff;color:var(--pu);border:1px solid #d7b3f8}
+.bam{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+
+/* Sub-service view */
+#serviceView{display:none}
+#subSrvGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem;margin-bottom:.2rem}
+
+/* ── MODULE VIEW ── */
+#modView{display:none;display:none;flex-direction:column;height:100%}
+#modGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:.15rem}
+.mcard{background:var(--s1);border:1.5px solid var(--brd);border-radius:var(--r);padding:.85rem .7rem;cursor:pointer;transition:all .2s;box-shadow:var(--sh);position:relative;overflow:hidden}
+.mcard:active{transform:scale(.97)}
+.mcard .mtop{height:3px;position:absolute;top:0;left:0;right:0;border-radius:var(--r) var(--r) 0 0}
+.mcard .mico{font-size:1.5rem;margin-bottom:.28rem}
+.mcard h4{font-size:.73rem;font-weight:700;color:var(--txt);margin-bottom:.25rem}
+.mcard .mcnt{font-size:.63rem;color:var(--dim);line-height:1.4}
+.mcard.active-mod{border-color:var(--az);background:var(--az3)}
+.mcard.active-mod h4{color:var(--az)}
+.mcard.mt .mtop{background:#7c3aed}.mcard.me .mtop{background:var(--az)}
+.mcard.mexp .mtop{background:#0891b2}.mcard.mr .mtop{background:var(--na)}
+.mcard.mo .mtop{background:#0891b2}.mcard.mc .mtop{background:#059669}
+.mcard.ma .mtop{background:#059669}.mcard.mb .mtop{background:var(--ro)}
+
+/* Module content */
+#modContent{overflow-y:auto;padding:.7rem;background:var(--bg);-webkit-overflow-scrolling:touch}
+
+/* ── TOOLBAR ── */
+.tbar{display:flex;gap:.38rem;margin-bottom:.5rem;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:8px;padding:.38rem .68rem;font-size:.75rem;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:.25rem;transition:all .15s}
+.baz2{background:var(--az);color:#fff}.baz2:active{background:var(--az2)}
+.bgr{background:var(--s1);color:var(--txt);border:1.5px solid var(--brd)}.bgr:active{background:var(--s3)}
+.bro2{background:var(--roli);color:var(--ro);border:1.5px solid var(--roba)}.bro2:active{background:var(--roba)}
+.bna2{background:var(--nali);color:var(--na);border:1.5px solid var(--naba)}
+.bve{background:var(--veli);color:var(--ve2);border:1.5px solid var(--veba)}
+.sp{flex:1}
+.fi{flex:1;background:var(--s1);border:1.5px solid var(--brd);color:var(--txt);border-radius:8px;padding:.38rem .55rem;font-size:.77rem}
+.fi::placeholder{color:var(--dim)}
+
+/* ── TASK FILTER ── */
+.tfilter{display:flex;gap:.28rem;margin-bottom:.48rem;flex-wrap:wrap}
+.tfb{background:var(--s1);border:1.5px solid var(--brd);color:var(--dim);border-radius:20px;padding:.2rem .6rem;font-size:.67rem;cursor:pointer;font-weight:600;transition:all .15s}
+.tfb.on.t-all{background:var(--az);color:#fff;border-color:var(--az)}
+.tfb.on.t-ta{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.tfb.on.t-co{background:var(--na);color:#fff;border-color:var(--na)}
+.tfb.on.t-ri{background:var(--ve2);color:#fff;border-color:var(--ve2)}
+
+/* ── TASK CARDS ── */
+.tcard{background:var(--s1);border:1.5px solid var(--brd);border-radius:10px;padding:.7rem .8rem;margin-bottom:.38rem;display:flex;align-items:flex-start;gap:.55rem;box-shadow:var(--sh)}
+.tcard.ct{border-left:4px solid var(--na)}.tcard.cr{border-left:4px solid var(--ve2)}
+.tcard.cg{border-left:4px solid #7c3aed}.tcard.co{border-left:4px solid var(--dim)}
+.tcBody{flex:1;min-width:0}.tcBody p{font-size:.77rem;line-height:1.4}
+.tcBody .tmeta{font-size:.62rem;color:var(--dim);margin-top:.22rem}
+.tcAct{display:flex;flex-direction:column;gap:.25rem;flex-shrink:0}
+
+/* ── OC PRIORITY ROW ── */
+.oc-urgent{background:#fff0f0;border:2px solid var(--ro);border-radius:8px;padding:.6rem .75rem;margin-bottom:.38rem;display:flex;align-items:center;gap:.5rem;box-shadow:0 2px 8px rgba(211,47,47,.2)}
+.oc-urgent .uc{flex:1}
+.oc-urgent .utag{font-size:.6rem;font-weight:700;background:var(--ro);color:#fff;border-radius:20px;padding:.12rem .45rem;margin-bottom:.2rem;display:inline-block}
+
+/* ── PILLS ── */
+.pill{border-radius:20px;padding:.13rem .45rem;font-size:.6rem;font-weight:700}
+.pok{background:var(--veli);color:var(--ve2);border:1px solid var(--veba)}
+.pwn{background:var(--nali);color:var(--na);border:1px solid var(--naba)}
+.pal{background:var(--roli);color:var(--ro);border:1px solid var(--roba)}
+.pin{background:#e0f7fa;color:var(--cy);border:1px solid #b2ebf2}
+.ppu{background:#f3e5ff;color:var(--pu);border:1px solid #d7b3f8}
+.pdim{background:var(--s3);color:var(--dim);border:1px solid var(--brd)}
+.pgold{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.dc{border-radius:20px;padding:.12rem .42rem;font-size:.6rem;font-weight:700;display:inline-block}
+
+/* ── GUARANTEE BADGE ── */
+.gar-ok{background:var(--veli);color:var(--ve2);border:1px solid var(--veba);border-radius:20px;padding:.1rem .4rem;font-size:.58rem;font-weight:700}
+.gar-no{background:var(--s3);color:var(--dim);border:1px solid var(--brd);border-radius:20px;padding:.1rem .4rem;font-size:.58rem;font-weight:700}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;border-radius:10px;border:1.5px solid var(--brd);box-shadow:var(--sh);-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.71rem}
+thead th{background:var(--s3);color:var(--dim);padding:.4rem .52rem;text-align:left;font-weight:700;white-space:nowrap;border-bottom:1.5px solid var(--brd)}
+tbody tr{border-bottom:1px solid var(--brd);background:var(--s1)}
+tbody tr:hover{background:var(--az3)}
+td{padding:.4rem .52rem;vertical-align:middle}
+.arow{display:flex;gap:.22rem}
+.ab{background:var(--s2);border:1.5px solid var(--brd);color:var(--dim);border-radius:5px;padding:.18rem .38rem;cursor:pointer;font-size:.64rem}
+.ab:hover{background:var(--az3);color:var(--az);border-color:var(--az)}
+.ab.cvt{background:var(--veli);color:var(--ve2);border-color:var(--veba);font-weight:700}
+.ab.cvt:hover{background:var(--ve2);color:#fff}
+.tipo-h{background:var(--az3);color:var(--az);border:1px solid #b3c8f8;border-radius:20px;padding:.1rem .36rem;font-size:.57rem;font-weight:700}
+.tipo-c{background:#f3e5ff;color:var(--pu);border:1px solid #d7b3f8;border-radius:20px;padding:.1rem .36rem;font-size:.57rem;font-weight:700}
+
+/* ── EMPTY ── */
+.emp{background:var(--s1);border:1.5px solid var(--brd);border-radius:10px;padding:1.5rem;text-align:center;color:var(--dim);font-size:.77rem;line-height:1.5}
+.emp .ei{font-size:1.8rem;margin-bottom:.35rem}
+.stitle{font-size:.7rem;font-weight:700;color:var(--dim);margin:.55rem 0 .28rem;text-transform:uppercase;letter-spacing:.03em}
+.infobx{background:#e8f5e9;border:1.5px solid #b3f0c0;border-radius:8px;padding:.48rem .7rem;font-size:.7rem;color:var(--ve);margin-top:.55rem}
+.warnbx{background:var(--nali);border:1.5px solid var(--naba);border-radius:8px;padding:.48rem .7rem;font-size:.7rem;color:var(--na);margin-top:.4rem}
+.alertbx{background:var(--roli);border:1.5px solid var(--roba);border-radius:8px;padding:.48rem .7rem;font-size:.7rem;color:var(--ro);margin-top:.4rem;font-weight:600}
+
+/* ── RIC-58 CONVERT BOX ── */
+.cvt-box{background:var(--veli);border:1.5px solid var(--veba);border-radius:8px;padding:.65rem .8rem;margin-bottom:.4rem}
+.cvt-box label{font-size:.7rem;color:var(--ve);font-weight:600;display:block;margin-bottom:.25rem}
+.cvt-box input{width:100%;background:#fff;border:1.5px solid var(--veba);border-radius:6px;padding:.42rem .55rem;font-size:.82rem;color:var(--txt)}
+
+/* ── STOCK ── */
+#stockPanel{display:none}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.42rem}
+.si{background:var(--s1);border:1.5px solid var(--brd);border-radius:10px;padding:.6rem;box-shadow:var(--sh)}
+.si.ok-s{border-left:4px solid var(--ve2)}.si.lw{border-left:4px solid var(--na)}.si.zr{border-left:4px solid var(--ro)}
+.si h4{font-size:.72rem;font-weight:700;margin-bottom:.28rem;line-height:1.3}
+.si .sn2{display:flex;gap:.38rem;font-size:.65rem;flex-wrap:wrap;color:var(--dim)}
+.si .sn2 b{color:var(--txt)}
+
+/* ── ADMIN ── */
+#adminPanel{display:none}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
+@media(min-width:460px){.ig{grid-template-columns:repeat(4,1fr)}}
+.ic{background:var(--s1);border:1.5px solid var(--brd);border-radius:var(--r);padding:.8rem .72rem;box-shadow:var(--sh)}
+.ic h4{font-size:.76rem;font-weight:700;margin-bottom:.2rem}
+.ilu{font-size:.62rem;color:var(--dim);margin-bottom:.5rem;min-height:.85rem}
+.drop{border:2px dashed var(--brd);border-radius:10px;padding:.75rem;text-align:center;cursor:pointer;position:relative;transition:all .2s;background:var(--s2)}
+.drop:hover,.drop.drag{border-color:var(--az);background:var(--az3)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop .di{font-size:1.2rem}.drop p{font-size:.64rem;color:var(--dim);margin-top:.12rem}
+.icols{font-size:.6rem;color:var(--dim);margin-top:.3rem;line-height:1.4}
+#prev{background:var(--s1);border:1.5px solid var(--brd);border-radius:var(--r);padding:.82rem;margin-top:.65rem;display:none;box-shadow:var(--sh)}
+#prev h4{font-size:.8rem;font-weight:700;margin-bottom:.42rem}
+.pss{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.45rem}
+.ps{background:var(--s2);border:1px solid var(--brd);border-radius:6px;padding:.3rem .55rem;font-size:.7rem}
+.ps b{color:var(--az)}
+.merge-row{background:var(--nali);border:1px solid var(--naba);border-radius:6px;padding:.35rem .58rem;font-size:.69rem;color:var(--na);margin-bottom:.28rem}
+
+/* ── FORM PANEL ── */
+#fp{position:fixed;left:0;right:0;bottom:0;background:var(--s1);border-top:2px solid var(--az);border-radius:18px 18px 0 0;z-index:400;transform:translateY(100%);transition:transform .28s ease;max-height:90dvh;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,.15)}
+#fp.open{transform:translateY(0)}
+#fphdr{padding:.72rem 1rem .48rem;display:flex;align-items:center;flex-shrink:0;border-bottom:1.5px solid var(--brd)}
+#fptit{font-size:.88rem;font-weight:700;flex:1}
+#fpx{background:var(--s3);border:1.5px solid var(--brd);color:var(--dim);border-radius:6px;padding:.25rem .5rem;cursor:pointer;font-size:.82rem}
+#fpbody{padding:.72rem 1rem;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+#fpfoot{padding:.52rem 1rem;display:flex;gap:.42rem;justify-content:flex-end;border-top:1.5px solid var(--brd);flex-shrink:0}
+.fg{margin-bottom:.65rem}
+.fg label{display:block;font-size:.7rem;color:var(--dim);margin-bottom:.22rem;font-weight:600}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--s2);border:1.5px solid var(--brd);color:var(--txt);border-radius:8px;padding:.46rem .62rem;font-size:.83rem;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--az);background:#fff}
+.fg textarea{resize:vertical;min-height:62px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:.48rem}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
+
+/* ── CONFIRM ── */
+#cfm{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:1rem}
+#cfm.on{display:flex}
+.cfb{background:var(--s1);border-radius:16px;padding:1.3rem 1.1rem;width:min(320px,94vw);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.cfb p{font-size:.85rem;line-height:1.6;margin-bottom:1rem;white-space:pre-line}
+
+/* ── TOAST ── */
+#tst{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;display:flex;flex-direction:column;gap:.3rem;align-items:center;pointer-events:none}
+.tm{background:#1a1a2e;color:#fff;border-radius:10px;padding:.46rem .82rem;font-size:.75rem;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:fi .22s ease;white-space:nowrap;max-width:92vw;text-align:center}
+.tm.ok{background:var(--ve2)}.tm.er{background:var(--ro)}.tm.wa{background:var(--na)}
+@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* ── LOADING ── */
+#loadScr{position:fixed;inset:0;background:rgba(240,242,248,.9);z-index:800;display:none;align-items:center;justify-content:center;flex-direction:column;gap:.7rem}
+.spin{width:36px;height:36px;border:3px solid var(--brd);border-top-color:var(--az);border-radius:50%;animation:sp .75s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loadMsg{font-size:.78rem;color:var(--dim)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScr">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="lbig">A6</div>
+      <h2>Ingeniería Clínica</h2>
+      <p>Hospital Rawson · San Juan</p>
+    </div>
+    <p style="font-size:.75rem;color:var(--dim);text-align:center;margin-bottom:.9rem">Seleccioná tu usuario</p>
+    <button class="ubtn" onclick="doLogin('Pablo Morales','Técnico')">
+      <div class="av" style="background:var(--az3);color:var(--az)">PM</div>
+      <div><div style="font-weight:700">Pablo Morales</div><div style="font-size:.68rem;color:var(--dim)">Técnico Biomédico</div></div>
+    </button>
+    <button class="ubtn" onclick="doLogin('Rocío Buenamaizon','Bioingeniera')">
+      <div class="av" style="background:var(--veli);color:var(--ve2)">RB</div>
+      <div><div style="font-weight:700">Rocío Buenamaizon</div><div style="font-size:.68rem;color:var(--dim)">Bioingeniera</div></div>
+    </button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadScr"><div class="spin"></div><div id="loadMsg">Cargando...</div></div>
+
+<!-- APP -->
+<div id="app">
+  <div id="hdr">
+    <div class="hlogo">A6</div>
+    <div class="htit">ÁREA 6<small>Ing. Clínica · Rawson</small></div>
+    <div class="hsp"></div>
+    <button class="hib" onclick="showGlobalTareas()" title="Ver todas las tareas">✅</button>
+    <button class="hib" onclick="showStock()">📦</button>
+    <button class="hib" onclick="showAdmin()">⚙️</button>
+    <button class="hib" onclick="doLogout()" style="opacity:.85">⏏</button>
+  </div>
+
+  <div id="main">
+    <div id="alertBan"></div>
+
+    <!-- BREADCRUMB -->
+    <div id="breadcrumb"></div>
+
+    <!-- DASHBOARD: service cards -->
+    <div id="dashView" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem"></div>
+
+    <!-- SERVICE VIEW: sub-service cards -->
+    <div id="serviceView" style="display:none">
+      <button class="volver" onclick="goHome()">← Volver</button>
+      <div class="sectit"><span id="srvIco2"></span><span id="srvNm2"></span></div>
+      <div id="subSrvGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem"></div>
+    </div>
+
+    <!-- MODULE VIEW: module cards + content -->
+    <div id="modView" style="display:none">
+      <button class="volver" onclick="goService()">← Volver</button>
+      <div class="sectit" style="margin-bottom:.48rem">
+        <span id="subSrvIco"></span>
+        <span id="subSrvNm" style="font-size:.82rem"></span>
+      </div>
+      <div id="modGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:.55rem">
+        <div class="mcard mt" onclick="openMod('tareas')"><div class="mtop"></div><div class="mico">✅</div><h4>Tareas / Compras</h4><div class="mcnt" id="mc-tareas">—</div></div>
+        <div class="mcard me" onclick="openMod('equipos')"><div class="mtop"></div><div class="mico">🩺</div><h4>Equipos</h4><div class="mcnt" id="mc-equipos">—</div></div>
+        <div class="mcard mexp" onclick="openMod('expedientes')"><div class="mtop"></div><div class="mico">📁</div><h4>Expedientes</h4><div class="mcnt" id="mc-expedientes">—</div></div>
+        <div class="mcard mr" onclick="openMod('ric58')"><div class="mtop"></div><div class="mico">📋</div><h4>RIC-58</h4><div class="mcnt" id="mc-ric58">—</div></div>
+        <div class="mcard mc" onclick="openMod('compras')"><div class="mtop"></div><div class="mico">🛒</div><h4>Compras / OC</h4><div class="mcnt" id="mc-compras">—</div></div>
+        <div class="mcard ma" onclick="openMod('actas')"><div class="mtop"></div><div class="mico">📄</div><h4>Actas</h4><div class="mcnt" id="mc-actas">—</div></div>
+        <div class="mcard mo" onclick="openMod('ordenes')"><div class="mtop"></div><div class="mico">🔧</div><h4>Órdenes Trabajo</h4><div class="mcnt" id="mc-ordenes">—</div></div>
+        <div class="mcard mb" onclick="openMod('bajas')"><div class="mtop"></div><div class="mico">🗑️</div><h4>Bajas RIC-44</h4><div class="mcnt" id="mc-bajas">—</div></div>
+      </div>
+      <div id="modContent"></div>
+    </div>
+
+    <!-- STOCK -->
+    <div id="stockPanel" style="display:none">
+      <button class="volver" onclick="goHome()">← Volver</button>
+      <div class="sectit"><span>📦</span> Stock · Repuestos e Insumos
+        <div class="sp"></div>
+        <button class="btn baz2" style="font-size:.72rem" onclick="openForm('stock')">+ Agregar</button>
+      </div>
+      <div class="tbar"><input class="fi" type="text" placeholder="Buscar repuesto o insumo..." oninput="renderStock(this.value)"></div>
+      <div id="stkCont"></div>
+    </div>
+
+    <!-- GLOBAL TAREAS VIEW -->
+    <div id="globalView" style="display:none">
+      <button class="volver" onclick="goHome()">← Volver</button>
+      <div class="sectit"><span>✅</span> Todas las Tareas · Registros globales</div>
+      <div class="tbar" style="margin-bottom:.55rem">
+        <button class="btn baz2" onclick="openGlobalForm('tarea')">✏️ Nueva Tarea</button>
+        <button class="btn" style="background:#f3e5ff;color:var(--pu);border:1.5px solid #d7b3f8" onclick="openGlobalForm('compra')">🛒 Nueva Compra</button>
+      </div>
+      <div id="globalContent"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="adminPanel" style="display:none">
+      <button class="volver" onclick="goHome()">← Volver</button>
+      <div class="sectit"><span>⚙️</span> Importar Excel mensual</div>
+      <div class="infobx" style="margin-bottom:.75rem">
+        📋 <b>Smart Merge:</b> actualiza equipos del Excel pero mantiene intactos los RIC-58, Expedientes y Tareas cargados manualmente.
+      </div>
+      <div class="ig">
+        <div class="ic"><h4>🩺 Equipos</h4><div class="ilu" id="luEq">Sin datos</div>
+          <div class="drop" ondragover="dov(event,this)" ondragleave="dlv(this)" ondrop="ddf(event,'eq')"><input type="file" accept=".xlsx" onchange="loadXLS(this,'eq')"><div class="di">📊</div><p>equipos.xlsx</p></div>
+          <div class="icols">Descrip · Marca-Modelo · Nº Serie · Servicio · Sub Servicio · Estado · Mant.</div></div>
+        <div class="ic"><h4>📁 Expedientes</h4><div class="ilu" id="luEx">Sin datos</div>
+          <div class="drop" ondragover="dov(event,this)" ondragleave="dlv(this)" ondrop="ddf(event,'ex')"><input type="file" accept=".xlsx" onchange="loadXLS(this,'ex')"><div class="di">📊</div><p>expe.xlsx</p></div>
+          <div class="icols">Servicio · Sub Servicio · N° Expediente · Fecha · Descripcion · Estado</div></div>
+        <div class="ic"><h4>📋 Órdenes</h4><div class="ilu" id="luOr">Sin datos</div>
+          <div class="drop" ondragover="dov(event,this)" ondragleave="dlv(this)" ondrop="ddf(event,'or')"><input type="file" accept=".xlsx" onchange="loadXLS(this,'or')"><div class="di">📊</div><p>orden.xlsx</p></div>
+          <div class="icols">Servicio · N° Orden · Fecha · Descripcion · Estado</div></div>
+        <div class="ic"><h4>📦 Stock</h4><div class="ilu" id="luSt">Sin datos</div>
+          <div class="drop" ondragover="dov(event,this)" ondragleave="dlv(this)" ondrop="ddf(event,'st')"><input type="file" accept=".xlsx" onchange="loadXLS(this,'st')"><div class="di">📊</div><p>Stock_actual.xlsx</p></div>
+          <div class="icols">Area · Descrip · Cantidad_in · Cantidad_out · Stock</div></div>
+      </div>
+      <div id="prev">
+        <h4 id="prevTit"></h4>
+        <div class="pss" id="prevSt"></div>
+        <div id="mergeInfo" style="margin-bottom:.5rem"></div>
+        <div class="tw" id="prevTbl"></div>
+        <div style="display:flex;gap:.42rem;margin-top:.62rem">
+          <button class="btn baz2" onclick="doImport()">✅ Confirmar importación</button>
+          <button class="btn bgr" onclick="cancelPrev()">✕ Cancelar</button>
+        </div>
+      </div>
+      <!-- EXPORT SECTION -->
+      <div style="margin-top:.8rem;padding-top:.8rem;border-top:1.5px solid var(--brd)">
+        <div class="stitle">Exportar a Excel</div>
+        <div style="background:var(--az3);border:1.5px solid #b3c8f8;border-radius:10px;padding:.65rem .85rem;margin-bottom:.6rem;font-size:.74rem;color:var(--az)">
+          📤 Genera un archivo .xlsx con todos los datos actuales de la app para actualizar <b>SKINET</b> y mantener ambos sistemas sincronizados.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.5rem">
+          <button class="btn baz2" onclick="exportExcel('all')">📥 Exportar todo</button>
+          <button class="btn bgr" onclick="exportExcel('equipos')">🩺 Solo Equipos</button>
+          <button class="btn bgr" onclick="exportExcel('tareas')">✅ Tareas / RIC01</button>
+          <button class="btn bgr" onclick="exportExcel('expedientes')">📁 Expedientes</button>
+          <button class="btn bgr" onclick="exportExcel('ric58')">📋 RIC-58</button>
+          <button class="btn bgr" onclick="exportExcel('compras')">🛒 Compras / OC</button>
+        </div>
+        <div id="exportMsg" style="font-size:.72rem;color:var(--ve2);min-height:1rem"></div>
+      </div>
+
+      <div style="margin-top:.8rem;padding-top:.8rem;border-top:1.5px solid var(--brd)">
+        <div class="stitle">Datos locales</div>
+        <div style="display:flex;gap:.42rem;flex-wrap:wrap">
+          <button class="btn bgr" onclick="dbSt()">📊 Conteos</button>
+          <button class="btn bro2" onclick="clearAll()">🗑️ Borrar todo</button>
+        </div>
+        <div id="dbSC" style="margin-top:.45rem;font-size:.71rem;color:var(--dim)"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- FORM PANEL -->
+<div id="fp">
+  <div id="fphdr"><div id="fptit">Nuevo registro</div><button id="fpx" onclick="closeForm()">✕</button></div>
+  <div id="fpbody"></div>
+  <div id="fpfoot">
+    <button class="btn bgr" onclick="closeForm()">Cancelar</button>
+    <button class="btn baz2" onclick="saveForm()">💾 Guardar</button>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div id="cfm">
+  <div class="cfb">
+    <p id="cfmMsg"></p>
+    <div style="display:flex;gap:.48rem;justify-content:center">
+      <button class="btn bro2" id="cfmOk">Confirmar</button>
+      <button class="btn bgr" onclick="closeCfm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="tst"></div>
+
+<script>
+// ════════════════════════════════════
+// CONSTANTES
+// ════════════════════════════════════
+const SRVS=[
+  {id:'ANATOMIA PATOLOGICA',       lb:'Anatomía Patológica',      ico:'🔬'},
+  {id:'LABORATORIO CENTRAL',       lb:'Laboratorio Central',       ico:'🧪'},
+  {id:'HEMATOLOGIA Y HEMOTERAPIA', lb:'Hemoterapia y Hematología', ico:'🩸'},
+  {id:'CLINICA MEDICA',            lb:'Clínica Médica',            ico:'👨‍⚕️'},
+  {id:'NEUROCIRUGIA',              lb:'Neurocirugía',              ico:'🧠'},
+  {id:'NEUROLOGIA',                lb:'Neurología',                ico:'🧬'},
+  {id:'GASTROENTEROLOGIA',         lb:'Gastroenterología',         ico:'🔭'},
+  {id:'VACUNATORIO',               lb:'Vacunatorio',               ico:'💉'},
+  {id:'PROCURACION',               lb:'Procuración',               ico:'🏥'},
+  {id:'INGENIERIA CLINICA',        lb:'Ingeniería Clínica',        ico:'⚙️'},
+];
+const GASTRO=['GASTROENTEROLOGIA','ENDOSCOPIA','ENDOSCOPÍA','GASTROENTEROLOGÍA'];
+const EST_EQ=['En Servicio','Rep. en Fabrica','En Deposito IC','Esp. Repuestos','Fuera de Servicio'];
+const EST_EX=['Iniciado','En Trámite','Aprobado','Archivado','Rechazado'];
+const EST_RIC58=['Enviado','Negado','Convertido a Expediente'];
+const EST_OR=['Iniciada','En Proceso','Completada','Cancelada'];
+const TIPOS_COMPRA=['Caja Chica','Reparación','Orden de Provisión (OC)'];
+const EST_OC=['Pendiente','Sin Oferentes','Entregado','Baja'];
+const MOTIVOS=['Obsoleto','Rotura Irreparable','Pérdida','Robo','Otro'];
+const TIPOS_A=['Salida','Entrada','Préstamo','Traslado'];
+const TIPOS_T=['Tarea General','RIC01','Otro'];
+const TIPOS_EQ=['Hospital','Comodato'];
+const PEDIDOS_GEN='__GENERAL__';
+const DB_NM='A6v6';
+const STORES=['equipos','expedientes','ric58','ordenes','actas','tareas','compras','bajas','stock','meta'];
+let _afterSaveCallback=null;
+
+// ════════════════════════════════════
+// ESTADO
+// ════════════════════════════════════
+let db,user,curSrv=null,curSubSrv=null,curMod=null;
+let fmType='',fmMode='new',fmId=null,pending={},curTaFil='all';
+
+// ════════════════════════════════════
+// INDEXEDDB
+// ════════════════════════════════════
+function openDB(){
+  return new Promise((ok,er)=>{
+    const r=indexedDB.open(DB_NM,1);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      STORES.forEach(s=>{if(!d.objectStoreNames.contains(s))d.createObjectStore(s,s==='meta'?{keyPath:'key'}:{keyPath:'id',autoIncrement:true})});
+    };
+    r.onsuccess=e=>{db=e.target.result;ok()};
+    r.onerror=e=>er(e.target.error);
+  });
+}
+const os=(s,m='readonly')=>db.transaction(s,m).objectStore(s);
+function getAll(s){return new Promise((ok,er)=>{const r=os(s).getAll();r.onsuccess=e=>ok(e.target.result||[]);r.onerror=e=>er(e.target.error)})}
+function put(s,o){return new Promise((ok,er)=>{const r=os(s,'readwrite').put(o);r.onsuccess=e=>ok(e.target.result);r.onerror=e=>er(e.target.error)})}
+function del(s,id){return new Promise((ok,er)=>{const r=os(s,'readwrite').delete(id);r.onsuccess=ok;r.onerror=e=>er(e.target.error)})}
+function clr(s){return new Promise((ok,er)=>{const r=os(s,'readwrite').clear();r.onsuccess=ok;r.onerror=e=>er(e.target.error)})}
+function bulkPut(s,rows){return new Promise((ok,er)=>{const t=db.transaction(s,'readwrite'),o=t.objectStore(s);rows.forEach(r=>o.put(r));t.oncomplete=ok;t.onerror=e=>er(e.target.error)})}
+async function getMeta(k){return new Promise(ok=>{const r=os('meta').get(k);r.onsuccess=e=>ok(e.target.result?.value||null);r.onerror=()=>ok(null)})}
+async function setMeta(k,v){return put('meta',{key:k,value:v})}
+
+// ════════════════════════════════════
+// PWA
+// ════════════════════════════════════
+function initPWA(){
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='60' fill='%23003d82'/><text x='256' y='375' text-anchor='middle' font-family='Arial Black,Arial' font-weight='900' font-size='290' fill='white'>A6</text></svg>`;
+  const iconHref=`data:image/svg+xml,${svg}`;
+  const m={name:'ÁREA 6 - Ingeniería Clínica',short_name:'ÁREA 6',start_url:'.',display:'standalone',background_color:'#f0f2f8',theme_color:'#003d82',icons:[{src:iconHref,sizes:'any',type:'image/svg+xml'}]};
+  const blob=new Blob([JSON.stringify(m)],{type:'application/json'});
+  document.getElementById('mfst').href=URL.createObjectURL(blob);
+  const lnk=document.createElement('link');lnk.rel='apple-touch-icon';lnk.href=iconHref;document.head.appendChild(lnk);
+  if('serviceWorker' in navigator){
+    const sw=`const C='a6v6';const F=['${location.href}','https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(F).catch(()=>{}))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res&&res.status===200){const cl=res.clone();caches.open(C).then(ca=>ca.put(e.request,cl))}return res}).catch(()=>caches.match(e.request)))));`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))).catch(()=>{});
+  }
+}
+
+// ════════════════════════════════════
+// AUTH
+// ════════════════════════════════════
+function doLogin(n,r){
+  user={n,r};localStorage.setItem('a6u',JSON.stringify(user));
+  g('loginScr').style.display='none';g('app').style.display='flex';boot();
+}
+function doLogout(){localStorage.removeItem('a6u');location.reload()}
+
+// ════════════════════════════════════
+// BOOT
+// ════════════════════════════════════
+async function boot(){
+  showLoad('Cargando datos...');
+  try{
+    await autoMigrate();
+    await renderDash();await loadDates();await checkAlerts()
+  }finally{hideLoad()}
+}
+
+// Auto-migrate from A6v5 if new DB is empty
+async function autoMigrate(){
+  try{
+    const eqs=await getAll('equipos');
+    if(eqs.length>0)return; // already has data
+    // Try to read from old DB
+    const OLD_STORES=['equipos','expedientes','ordenes','actas','tareas','bajas','stock'];
+    const oldDb=await new Promise((ok,er)=>{
+      const r=indexedDB.open('A6v5',1);
+      r.onsuccess=e=>ok(e.target.result);
+      r.onerror=()=>ok(null);
+      r.onblocked=()=>ok(null);
+    });
+    if(!oldDb)return;
+    let migrated=0;
+    for(const s of OLD_STORES){
+      try{
+        const rows=await new Promise(ok=>{
+          const tx=oldDb.transaction(s,'readonly');
+          const req=tx.objectStore(s).getAll();
+          req.onsuccess=e=>ok(e.target.result||[]);
+          req.onerror=()=>ok([]);
+        });
+        if(rows.length){await bulkPut(s,rows);migrated+=rows.length}
+      }catch(e){}
+    }
+    oldDb.close();
+    if(migrated>0){
+      await setMeta('migrated_from','A6v5');
+      toast('✅ '+migrated+' registros recuperados automáticamente','ok');
+    }
+  }catch(e){console.warn('Migration skipped:',e.message)}
+}
+function showLoad(m=''){g('loadScr').style.display='flex';g('loadMsg').textContent=m}
+function hideLoad(){g('loadScr').style.display='none'}
+
+// ════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════
+async function renderDash(){
+  try{
+    const[eqs,exs,ors,tas,rics,cos]=await Promise.all([
+      getAll('equipos'),getAll('expedientes'),getAll('ordenes'),
+      getAll('tareas'),getAll('ric58'),getAll('compras')
+    ]);
+    const hoy=today();
+    let html='';
+    SRVS.forEach(srv=>{
+      const se=eqs.filter(e=>mSrv(e.servicio,srv.id));
+      const sx=exs.filter(e=>mSrv(e.servicio,srv.id));
+      const so=ors.filter(e=>mSrv(e.servicio,srv.id));
+      const sr=rics.filter(e=>mSrv(e.servicio,srv.id));
+      const sc=cos.filter(e=>mSrv(e.servicio,srv.id));
+      let al=0,wn=0;
+      se.forEach(e=>{const d=diff(hoy,toD(e.proximoMant));if(d!==null&&d<0)al++;else if(d!==null&&d<30)wn++;});
+      const ocUrgente=sc.filter(c=>c.tipo==='Orden de Provisión (OC)'&&c.estadoOC==='Sin Oferentes').length;
+      const cls=al?'al':wn?'wn':'ok';
+      const stlbl=al?'⚠ ALERTA':wn?'⏰ ADVERTENCIA':'✓ OK';
+      html+=`<div class="scard ${cls}" onclick="openSrv('${srv.id}')">
+        <div class="strip"></div>
+        <div class="stlbl">${stlbl}</div>
+        <div class="ico">${srv.ico}</div>
+        <h3>${srv.lb}</h3>
+        <div class="cnts">
+          <span class="bx baz">${se.length} eq.</span>
+          ${al?`<span class="bx bro">⚠${al}</span>`:''}
+          ${wn?`<span class="bx bna">⏰${wn}</span>`:''}
+          ${sr.filter(r=>r.estado==='Enviado').length?`<span class="bx bpu">${sr.filter(r=>r.estado==='Enviado').length} RIC-58</span>`:''}
+          ${ocUrgente?`<span class="bx bro">🚨 OC${ocUrgente}</span>`:''}
+          ${sx.length?`<span class="bx bdim">${sx.length} exp</span>`:''}
+        </div>
+      </div>`;
+    });
+    if(!eqs.length&&!exs.length)html+=`<div style="grid-column:1/-1"><div class="emp"><div class="ei">📂</div>Sin datos.<br>Ir a <b>⚙️ Admin</b> para importar los Excel.</div></div>`;
+    g('dashView').innerHTML=html;
+  }catch(e){g('dashView').innerHTML=`<div style="grid-column:1/-1"><div class="emp"><div class="ei">⚠️</div>Error: ${e.message}</div></div>`}
+}
+
+// ════════════════════════════════════
+// SERVICE → sub-service cards
+// ════════════════════════════════════
+async function openSrv(id){
+  const s=SRVS.find(x=>x.id===id);if(!s)return;
+  curSrv=id;curSubSrv=null;curMod=null;
+  showView('serviceView');
+  g('srvIco2').textContent=s.ico;
+  g('srvNm2').textContent=s.lb;
+  updateBreadcrumb();
+  await renderSubServices();
+}
+
+async function renderSubServices(){
+  try{
+    const eqs=await getAll('equipos');
+    const srvEqs=eqs.filter(e=>mSrv(e.servicio,curSrv));
+    const hoy=today();
+    const subSet=new Set();
+    srvEqs.forEach(e=>{if(e.subServicio&&e.subServicio.trim())subSet.add(e.subServicio.trim())});
+    const subs=Array.from(subSet).sort();
+
+    // If no sub-services at all, skip this layer and go directly to modules
+    // using PEDIDOS_GEN as the sub-service scope
+    if(subs.length===0){
+      // Show a single "Ver todo el servicio" card + Pedidos Generales
+      const el=g('subSrvGrid');
+      if(el) el.innerHTML=`
+        <div class="scard ok" onclick="openSubSrv('${PEDIDOS_GEN}')" style="grid-column:1/-1">
+          <div class="strip"></div>
+          <div class="stlbl">✓ SIN SUB-SERVICIOS</div>
+          <div class="ico">📋</div>
+          <h3>Ver todo el servicio</h3>
+          <div class="cnts">
+            <span class="bx baz">${srvEqs.length} equipos</span>
+            <span class="bx bdim">Tareas · Compras · RIC-58</span>
+          </div>
+        </div>`;
+      return;
+    }
+
+    let html='';
+    subs.forEach(sub=>{
+      const eqs2=srvEqs.filter(e=>(e.subServicio||'').trim()===sub);
+      let al=0,wn=0;
+      eqs2.forEach(e=>{const d=diff(hoy,toD(e.proximoMant));if(d!==null&&d<0)al++;else if(d!==null&&d<30)wn++;});
+      const cls=al?'al':wn?'wn':'ok';
+      const stlbl=al?'⚠ ALERTA':wn?'⏰ ADVERTENCIA':'✓ OK';
+      html+=`<div class="scard ${cls}" onclick="openSubSrv('${es(sub)}')">
+        <div class="strip"></div>
+        <div class="stlbl">${stlbl}</div>
+        <div class="ico">🏷️</div>
+        <h3>${es(sub)}</h3>
+        <div class="cnts">
+          <span class="bx baz">${eqs2.length} eq.</span>
+          ${al?`<span class="bx bro">⚠${al}</span>`:''}
+          ${wn?`<span class="bx bna">⏰${wn}</span>`:''}
+        </div>
+      </div>`;
+    });
+    const genEqs=srvEqs.filter(e=>!e.subServicio||!e.subServicio.trim());
+    html+=`<div class="scard ok" onclick="openSubSrv('${PEDIDOS_GEN}')">
+      <div class="strip"></div>
+      <div class="stlbl">📌 GENERAL</div>
+      <div class="ico">📦</div>
+      <h3>Pedidos Generales</h3>
+      <div class="cnts">
+        ${genEqs.length?`<span class="bx baz">${genEqs.length} eq.</span>`:''}
+        <span class="bx bdim">Tareas · Compras</span>
+      </div>
+    </div>`;
+    const el=g('subSrvGrid');
+    if(el) el.innerHTML=html;
+  }catch(e){
+    const el=g('subSrvGrid');
+    if(el) el.innerHTML=`<div style="grid-column:1/-1"><div class="emp"><div class="ei">⚠️</div>Error: ${e.message}</div></div>`;
+  }
+}
+
+// ════════════════════════════════════
+// SUB-SERVICE → module cards
+// ════════════════════════════════════
+async function openSubSrv(sub){
+  curSubSrv=sub;curMod=null;
+  showView('modView');
+  const ico=sub===PEDIDOS_GEN?'📦':'🏷️';
+  const nm=sub===PEDIDOS_GEN?'Pedidos Generales':sub;
+  g('subSrvIco').textContent=ico;
+  g('subSrvNm').textContent=nm;
+  document.querySelectorAll('.mcard').forEach(c=>c.classList.remove('active-mod'));
+  g('modContent').innerHTML='';
+  updateBreadcrumb();
+  await updateModCounts();
+}
+
+function goService(){
+  curSubSrv=null;curMod=null;
+  showView('serviceView');
+  updateBreadcrumb();
+  renderSubServices();
+}
+
+async function updateModCounts(){
+  if(!curSrv)return;
+  try{
+    const[eqs,exs,ors,acs,tas,rics,cos,bas]=await Promise.all([
+      getAll('equipos'),getAll('expedientes'),getAll('ordenes'),getAll('actas'),
+      getAll('tareas'),getAll('ric58'),getAll('compras'),getAll('bajas')
+    ]);
+    const f=(a,field='servicio')=>a.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+    const hoy=today();
+    const se=f(eqs);
+    let al=0,wn=0;
+    se.forEach(e=>{const d=diff(hoy,toD(e.proximoMant));if(d!==null&&d<0)al++;else if(d!==null&&d<30)wn++;});
+    const ta=f(tas);const co=f(cos);
+    g('mc-tareas').innerHTML=`${ta.length} registros`;
+    g('mc-equipos').innerHTML=`${se.length} equipos${al?` · <b style="color:var(--ro)">⚠${al}</b>`:''}${wn?` · <span style="color:var(--na)">⏰${wn}</span>`:''}`;
+    g('mc-expedientes').innerHTML=`${f(exs).length} expedientes`;
+    g('mc-ric58').innerHTML=`${f(rics).filter(r=>r.estado==='Enviado').length} enviados`;
+    g('mc-compras').innerHTML=`${co.filter(c=>c.tipo==='Orden de Provisión (OC)'&&c.estadoOC==='Sin Oferentes').length?'🚨 Sin Oferentes · ':''}${co.length} total`;
+    g('mc-actas').innerHTML=`${f(acs).length} actas`;
+    g('mc-ordenes').innerHTML=`${f(ors).length} órdenes`;
+    g('mc-bajas').innerHTML=`${f(bas).length} bajas`;
+  }catch(e){}
+}
+
+function matchSub(item){
+  if(!curSubSrv)return true;
+  if(curSubSrv===PEDIDOS_GEN)return !item.subServicio||!item.subServicio.trim();
+  return (item.subServicio||'').trim()===curSubSrv;
+}
+
+async function openMod(type){
+  curMod=type;
+  document.querySelectorAll('.mcard').forEach(c=>c.classList.remove('active-mod'));
+  const map={tareas:'mt',equipos:'me',expedientes:'mexp',ric58:'mr',compras:'mc',actas:'ma',ordenes:'mo',bajas:'mb'};
+  document.querySelectorAll('.mcard.'+map[type]).forEach(c=>c.classList.add('active-mod'));
+  const tc=g('modContent');
+  tc.innerHTML=`<div style="color:var(--dim);font-size:.78rem;padding:.4rem">Cargando...</div>`;
+  try{
+    if(type==='tareas')          await modTa(tc);
+    else if(type==='equipos')    await modEq(tc);
+    else if(type==='expedientes')await modEx(tc);
+    else if(type==='ric58')      await modRIC58(tc);
+    else if(type==='compras')    await modCompras(tc);
+    else if(type==='actas')      await modAc(tc);
+    else if(type==='ordenes')    await modOr(tc);
+    else if(type==='bajas')      await modBa(tc);
+    tc.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){tc.innerHTML=`<div class="emp"><div class="ei">⚠️</div>Error: ${e.message}</div>`}
+}
+
+// ── TAREAS ──
+async function modTa(tc){
+  const all=await getAll('tareas');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  const abiertas=rows.filter(r=>r.estado!=='Cerrada'&&r.estado!=='Archivada');
+  // Cerradas: separar las que tienen SKINET pendiente de las listas para archivar
+  const cerradas=rows.filter(r=>r.estado==='Cerrada');
+  // Archivadas: historial completo (no se muestran en filtros normales)
+  const cerPendSk=cerradas.filter(r=>r.tipo==='RIC01'&&!r.skinet);
+  const cnt={all:abiertas.length,ta:abiertas.filter(r=>!r.tipo||r.tipo==='Tarea General'||r.tipo==='Otro').length,ri:abiertas.filter(r=>r.tipo==='RIC01').length,ce:cerradas.length};
+  const base={all:abiertas,ta:abiertas.filter(r=>!r.tipo||r.tipo==='Tarea General'||r.tipo==='Otro'),ri:abiertas.filter(r=>r.tipo==='RIC01'),ce:cerradas};
+  const shown=base[curTaFil]||abiertas;
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('tarea')">+ Tarea</button>
+    </div>
+    <div class="tfilter">
+      <button class="tfb ${curTaFil==='all'?'on t-all':''}" onclick="setTF('all',this)">Abiertas (${cnt.all})</button>
+      <button class="tfb ${curTaFil==='ta'?'on t-ta':''}" onclick="setTF('ta',this)">📝 Tareas (${cnt.ta})</button>
+      <button class="tfb ${curTaFil==='ri'?'on t-ri':''}" onclick="setTF('ri',this)">✅ RIC01 (${cnt.ri})</button>
+      <button class="tfb ${curTaFil==='ce'?'on t-co':''}" onclick="setTF('ce',this)">🔒 Cerradas (${cnt.ce}${cerPendSk.length?' · ⚠'+cerPendSk.length:''})</button>
+    </div>
+    ${cerPendSk.length&&curTaFil==='ce'?`<div class="warnbx" style="margin-bottom:.5rem">⚠️ <b>${cerPendSk.length} tarea${cerPendSk.length>1?'s':''} RIC01</b> cerrada${cerPendSk.length>1?'s':''} con SKINET pendiente. Registrá en SKINET y luego marcá ✓ para poder archivar.</div>`:''}
+    ${!shown.length?`<div class="emp"><div class="ei">✅</div>${curTaFil==='ce'?'Sin tareas cerradas.':'Sin tareas abiertas.'}</div>`
+    :shown.map(t=>{
+      const tipo=t.tipo||'Tarea General';
+      const cerrada=t.estado==='Cerrada';
+      const esRic=tipo==='RIC01';
+      // SKINET siempre visible en RIC01, tanto abierta como cerrada
+      const skiPill=t.skinet?'<span class="pill pok">✓ SKINET</span>':'<span class="pill pwn">⚠ SKINET pend.</span>';
+      const tcls=cerrada?'co':esRic?'cr':tipo==='Tarea General'?'cg':'co';
+      const tipoPill=cerrada
+        ?`<span class="pill pdim">🔒 Cerrada</span>`
+        :esRic?`<span class="pill pok">✅ RIC01</span>`
+        :`<span class="pill pin">📝 Tarea</span>`;
+      // Botones según estado
+      // Abierta: botón ✔ cerrar
+      // Cerrada RIC01 sin SKINET: botón 📱 marcar SKINET, botón ↩ reabrir — NO puede archivar
+      // Cerrada con SKINET ok (o no RIC01): botón 🗃 archivar + ↩ reabrir
+      const puedeArchivar=cerrada&&(!esRic||t.skinet);
+      const botonesAct=!cerrada
+        ?`<button class="ab cvt" onclick="cerrarTarea(${t.id})" title="Marcar trabajo hecho">✔</button>`
+        :(esRic&&!t.skinet)
+          ?`<button class="ab" style="background:var(--nali);color:var(--na);border-color:var(--naba)" onclick="marcarSkinet(${t.id})" title="Marcar como registrado en SKINET">📱</button>
+            <button class="ab" onclick="reabrirTarea(${t.id})" title="Reabrir">↩</button>`
+          :`<button class="ab" style="background:var(--veli);color:var(--ve2);border-color:var(--veba)" onclick="archivarTarea(${t.id})" title="Archivar (todo listo)">🗃</button>
+            <button class="ab" onclick="reabrirTarea(${t.id})" title="Reabrir">↩</button>`;
+      return`<div class="tcard ${tcls}" style="${cerrada?'opacity:.75;':''}">
+        <div class="tcBody">
+          <div style="display:flex;gap:.28rem;flex-wrap:wrap;margin-bottom:.28rem">
+            ${tipoPill}${esRic?skiPill:''}
+          </div>
+          <p style="${cerrada?'text-decoration:line-through;color:var(--dim)':''}">${es(t.descripcion)}</p>
+          ${t.detalle?`<p style="color:var(--dim);font-size:.67rem;margin-top:.2rem">${es(t.detalle)}</p>`:''}
+          <div class="tmeta">${t.fecha||'—'} · ${es(t.usuario)}${cerrada&&t.fechaCierre?' · Cerrada: '+t.fechaCierre:''}</div>
+        </div>
+        <div class="tcAct">
+          ${botonesAct}
+          <button class="ab" onclick="editR('tarea',${t.id})">✏️</button>
+          ${puedeArchivar||!cerrada?`<button class="ab" onclick="delR('tarea',${t.id})">🗑</button>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="infobx">ℹ️ Tareas <b>RIC01</b>: cerrá al terminar el trabajo → registrá en SKINET → archivá.</div>`;
+}
+function setTF(f,el){curTaFil=f;document.querySelectorAll('.tfb').forEach(b=>b.className='tfb');el.className='tfb on t-'+(f==='ce'?'co':f);openMod('tareas')}
+
+async function cerrarTarea(id){
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  await put('tareas',{...t,estado:'Cerrada',fechaCierre:hoy});
+  toast('Tarea cerrada ✔','ok');await refreshView();
+}
+async function marcarSkinet(id){
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  await put('tareas',{...t,skinet:true,fechaSkinet:hoy});
+  toast('SKINET registrado ✔','ok');await refreshView();
+}
+async function archivarTarea(id){
+  cfm2('¿Archivar esta tarea?\nQuedará en el historial pero no en las listas activas.',async()=>{
+    const all=await getAll('tareas');
+    const t=all.find(r=>r.id===id);if(!t)return;
+    await put('tareas',{...t,estado:'Archivada'});
+    toast('Tarea archivada','ok');await refreshView();
+  });
+}
+async function reabrirTarea(id){
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  const updated={...t};delete updated.estado;delete updated.fechaCierre;
+  await put('tareas',updated);
+  toast('Tarea reabierta','ok');await refreshView();
+}
+
+// ── EQUIPOS ──
+let _eqFamilia='';
+async function modEq(tc){
+  const all=await getAll('equipos');
+  let rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  const hoy=today();
+  rows.sort((a,b)=>{
+    const da=diff(hoy,toD(a.proximoMant)),db2=diff(hoy,toD(b.proximoMant));
+    if(da===null&&db2===null)return 0;if(da===null)return 1;if(db2===null)return -1;return da-db2;
+  });
+  if(!rows.length){tc.innerHTML=`<div class="tbar"><button class="btn baz2" onclick="openForm('equipo')">+ Agregar equipo</button></div><div class="emp"><div class="ei">🩺</div>Sin equipos. Importá <b>equipos.xlsx</b>.</div>`;return}
+  // Familias: primera palabra del nombre
+  const familias=[...new Set(rows.map(e=>(es(e.descrip)||'').trim().split(/\s+/)[0]||'Otros'))].sort();
+  const shown=_eqFamilia?rows.filter(e=>(es(e.descrip)||'').trim().toUpperCase().startsWith(_eqFamilia.toUpperCase())):rows;
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('equipo')">+ Agregar</button>
+      <div class="sp"></div>
+      <span class="bx baz" style="font-size:.62rem">${rows.filter(e=>!e.tipoEq||e.tipoEq==='Hospital').length} hosp.</span>
+      <span class="bx bpu" style="font-size:.62rem">${rows.filter(e=>e.tipoEq==='Comodato').length} comod.</span>
+    </div>
+    <div class="tbar" style="gap:.3rem;flex-wrap:wrap">
+      <select class="fi" style="flex:1;min-width:120px" onchange="filtrarFamiliaEq(this.value)">
+        <option value="">📂 Todas (${rows.length})</option>
+        ${familias.map(f=>`<option value="${f}" ${_eqFamilia===f?'selected':''}>${f} (${rows.filter(e=>(es(e.descrip)||'').trim().toUpperCase().startsWith(f.toUpperCase())).length})</option>`).join('')}
+      </select>
+      <input class="fi" style="flex:2;min-width:130px" type="text" placeholder="Buscar equipo, serie, marca..." oninput="ft('eqT',this.value)">
+    </div>
+    ${_eqFamilia?`<div style="font-size:.7rem;color:var(--az);margin-bottom:.35rem;font-weight:600">📂 <b>${_eqFamilia}</b> · ${shown.length} equipos <button class="ab" style="font-size:.62rem;margin-left:.3rem" onclick="filtrarFamiliaEq('')">✕ Ver todas</button></div>`:''}
+    <div class="tw"><table id="eqT">
+      <thead><tr><th>Equipo / Marca · Serie</th><th>Tipo</th><th>Estado</th><th>Próx.Mant</th><th>Días</th><th>Garantía</th><th></th></tr></thead>
+      <tbody>${shown.map(e=>{
+        const pd=toD(e.proximoMant),d=diff(hoy,pd);
+        const tipoB=e.tipoEq==='Comodato'?`<span class="tipo-c">Comodato</span>`:`<span class="tipo-h">Hospital</span>`;
+        const garBadge=garantiaBadge(e.fechaCompra,e.garantiaMeses);
+        return`<tr>
+          <td>
+            <b style="font-size:.72rem">${es(e.descrip)}</b><br>
+            <span style="font-size:.61rem;color:var(--dim)">${es(e.marca)} · ${es(e.serie)}</span>
+            ${e.proveedor?`<br><span style="font-size:.6rem;color:var(--cy)">📦 ${es(e.proveedor)}</span>`:''}
+          </td>
+          <td>${tipoB}</td>
+          <td>${pill(e.estado,'eq')}</td>
+          <td style="font-size:.64rem">${fd(pd)}</td>
+          <td>${dchip(d)}</td>
+          <td>${garBadge}</td>
+          <td><div class="arow">
+            <button class="ab" onclick="editR('equipo',${e.id})">✏️</button>
+            <button class="ab" style="background:var(--roli);color:var(--ro);border-color:var(--roba);font-weight:700" onclick="iniciarBajaEquipo(${e.id})" title="Dar de baja · pasa a lista SKINET">↓ Baja</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+}
+function filtrarFamiliaEq(val){
+  _eqFamilia=val;
+  // Mantener posición — recargar módulo sin volver al tope
+  const cont=document.getElementById('modContent');
+  const scrollY=cont?cont.scrollTop:0;
+  openMod('equipos').then(()=>{if(cont)cont.scrollTop=scrollY;});
+}
+
+async function iniciarBajaEquipo(id){
+  const all=await getAll('equipos');
+  const eq=all.find(e=>e.id===id);
+  if(!eq)return;
+  // Usar el panel de formulario existente (fp) como mini-modal de baja
+  g('fptit').textContent='Dar de Baja · '+eq.descrip;
+  g('fpbody').innerHTML=`
+    <div style="background:var(--roli);border:1.5px solid var(--roba);border-radius:8px;padding:.6rem .8rem;margin-bottom:.7rem;font-size:.74rem;color:var(--ro)">
+      ⚠️ El equipo queda marcado como <b>De Baja</b> en la lista y se registra en Bajas RIC-44.<br>
+      <b>No se elimina de SKINET automáticamente</b> — vas a ver el pendiente en Bajas.
+    </div>
+    <div style="font-size:.78rem;font-weight:700;margin-bottom:.5rem">
+      🩺 ${es(eq.descrip)}<br>
+      <span style="font-weight:400;color:var(--dim);font-size:.7rem">${es(eq.marca||'')} · ${es(eq.serie||'')} · ${es(eq.servicio||'')}</span>
+    </div>
+    <div class="fg"><label>Motivo de baja</label>
+      <select id="_bajaMot">
+        <option>Obsoleto</option><option>Rotura Irreparable</option><option>Pérdida</option><option>Robo</option><option>Otro</option>
+      </select>
+    </div>
+    <div class="fg"><label>Observaciones (serie inventario, notas)</label>
+      <textarea id="_bajaObs" rows="2" placeholder="Ej: Inventario 12345, sin piezas de repuesto..."></textarea>
+    </div>`;
+  g('fpfoot').innerHTML=`
+    <button class="btn bgr" onclick="closeForm()">Cancelar</button>
+    <button class="btn" style="background:var(--ro);color:#fff" onclick="confirmarBajaEquipo(${eq.id})">🗑 Confirmar baja</button>`;
+  g('fp').classList.add('open');
+}
+
+async function confirmarBajaEquipo(id){
+  const all=await getAll('equipos');
+  const eq=all.find(e=>e.id===id);
+  if(!eq)return;
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const motivo=document.getElementById('_bajaMot')?.value||'Obsoleto';
+  const obs=document.getElementById('_bajaObs')?.value||'';
+  // 1. Crear registro en bajas con skinetPendiente=true
+  await put('bajas',{
+    id:Date.now(),
+    equipo:eq.descrip,
+    marca:eq.marca||'',
+    serie:eq.serie||'',
+    servicio:eq.servicio||'',
+    subServicio:eq.subServicio||'',
+    tipoEq:eq.tipoEq||'Hospital',
+    motivo:motivo,
+    observaciones:obs,
+    fecha:hoy,
+    usuario:user?.n||'',
+    skinetPendiente:true,
+    equipoId:eq.id
+  });
+  // 2. Marcar equipo como "De Baja" — NO se elimina, queda en el registro
+  await put('equipos',{...eq,estado:'De Baja',mod:hoy});
+  closeForm();
+  toast('Baja registrada · Pendiente eliminar en SKINET','ok');
+  await refreshView();
+}
+
+function garantiaBadge(fechaCompra,meses=12){
+  const fc=toD(fechaCompra);
+  if(!fc)return'<span class="gar-no">Sin fecha</span>';
+  const vence=new Date(fc);vence.setMonth(vence.getMonth()+Number(meses||12));
+  const hoy=today();
+  if(hoy<=vence){
+    const dRestantes=diff(hoy,vence);
+    return`<span class="gar-ok">✓ ${dRestantes}d</span>`;
+  }
+  return`<span class="gar-no">Vencida</span>`;
+}
+
+// ── EXPEDIENTES ──
+async function modEx(tc){
+  const all=await getAll('expedientes');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  const hoy=today();
+  const ini=rows.filter(e=>e.estado==='Iniciado'||!e.estado);
+  const tr=rows.filter(e=>e.estado==='En Trámite');
+  const ap=rows.filter(e=>e.estado==='Aprobado');
+  const ot=rows.filter(e=>e.estado==='Archivado'||e.estado==='Rechazado');
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('expediente')">+ Agregar</button>
+      <div class="sp"></div>
+      <span class="bx bna">${tr.length} trámite</span>
+      <span class="bx bgr2">${ap.length} aprobados</span>
+    </div>
+    ${exS('📂 Iniciados',ini,hoy)}${exS('⏳ En Trámite',tr,hoy)}${ap.length?exS('✅ Aprobados',ap,hoy):''}${ot.length?exS('📁 Archivados/Rechazados',ot,hoy):''}
+    ${!rows.length?`<div class="emp"><div class="ei">📁</div>Sin expedientes. Importá <b>expe.xlsx</b> o agregar manualmente.</div>`:''}`;
+}
+function exS(t,rows,hoy){
+  if(!rows.length)return'';
+  return`<div class="stitle">${t} (${rows.length})</div>
+    <div class="tw" style="margin-bottom:.55rem"><table>
+    <thead><tr><th>N° Exp.</th><th>Descripción</th><th>Inicio</th><th>Días</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${rows.map(e=>{
+      const fi=toD(e.fechaInicio),d=diff(fi,hoy);
+      return`<tr>
+        <td><b>${es(e.numero)}</b></td>
+        <td style="max-width:140px;font-size:.68rem">${es(e.descripcion)}</td>
+        <td style="font-size:.63rem">${fd(fi)}</td>
+        <td><span class="dc" style="background:#e0f7fa;color:var(--cy);border:1px solid #b2ebf2">${d!==null?d+'d':'—'}</span></td>
+        <td>${pill(e.estado,'ex')}</td>
+        <td><div class="arow">
+          <button class="ab" onclick="editR('expediente',${e.id})">✏️</button>
+          <button class="ab" onclick="delR('expediente',${e.id})">🗑</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+// ── RIC-58 ──
+async function modRIC58(tc){
+  const all=await getAll('ric58');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  const hoy=today();
+  const env=rows.filter(r=>r.estado==='Enviado'||!r.estado);
+  const neg=rows.filter(r=>r.estado==='Negado');
+  const cvt=rows.filter(r=>r.estado==='Convertido a Expediente');
+
+  const ric58Row=(r)=>{
+    const fi=toD(r.fechaEnvio),d=diff(fi,hoy);
+    const estPill=r.estado==='Enviado'?`<span class="pill ppu">📤 Enviado</span>`:r.estado==='Negado'?`<span class="pill pal">✕ Negado</span>`:`<span class="pill pok">✓ Convertido</span>`;
+    return`<tr>
+      <td><b>${es(r.numero||'—')}</b></td>
+      <td style="max-width:130px;font-size:.68rem">${es(r.descripcion)}</td>
+      <td style="font-size:.63rem">${fd(fi)}</td>
+      <td><span class="dc" style="background:#e0f7fa;color:var(--cy);border:1px solid #b2ebf2">${d!==null?d+'d':'—'}</span></td>
+      <td>${estPill}</td>
+      <td><div class="arow">
+        ${r.estado==='Enviado'?`<button class="ab cvt" onclick="convertirRic58(${r.id})">📁 Convertir</button>`:''}
+        <button class="ab" onclick="editR('ric58',${r.id})">✏️</button>
+        <button class="ab" onclick="delR('ric58',${r.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  };
+
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('ric58')">+ Nuevo RIC-58</button>
+      <div class="sp"></div>
+      <span class="bx bpu">${env.length} enviados</span>
+      ${neg.length?`<span class="bx bro">${neg.length} negados</span>`:''}
+    </div>
+    ${!rows.length?`<div class="emp"><div class="ei">📋</div>Sin RIC-58 registrados.</div>`:`
+    ${env.length?`<div class="stitle">📤 Enviados (${env.length})</div>
+      <div class="tw" style="margin-bottom:.55rem"><table>
+      <thead><tr><th>N° RIC-58</th><th>Descripción</th><th>Envío</th><th>Días</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${env.map(ric58Row).join('')}</tbody></table></div>`:''}
+    ${neg.length?`<div class="stitle">✕ Negados (${neg.length})</div>
+      <div class="tw" style="margin-bottom:.55rem"><table>
+      <thead><tr><th>N° RIC-58</th><th>Descripción</th><th>Envío</th><th>Días</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${neg.map(ric58Row).join('')}</tbody></table></div>`:''}
+    ${cvt.length?`<div class="stitle">✅ Convertidos a Expediente (${cvt.length})</div>
+      <div class="tw"><table>
+      <thead><tr><th>N° RIC-58</th><th>Descripción</th><th>Envío</th><th>Exp. Generado</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${cvt.map(r=>`<tr>
+        <td><b>${es(r.numero)}</b></td>
+        <td style="font-size:.68rem;max-width:120px">${es(r.descripcion)}</td>
+        <td style="font-size:.63rem">${fd(toD(r.fechaEnvio))}</td>
+        <td><b style="color:var(--ve2)">${es(r.expGenerado||'—')}</b></td>
+        <td><span class="pill pok">✓ Convertido</span></td>
+        <td><div class="arow"><button class="ab" onclick="delR('ric58',${r.id})">🗑</button></div></td>
+      </tr>`).join('')}</tbody></table></div>`:''}
+    `}
+    <div class="infobx">💡 Al convertir un RIC-58 se crea automáticamente el expediente y se archiva el RIC-58.</div>`;
+}
+
+// RIC-58 Conversion flow
+async function convertirRic58(id){
+  const all=await getAll('ric58');
+  const ric=all.find(r=>r.id===id);if(!ric)return;
+  // Show inline conversion form
+  const tc=g('modContent');
+  const hoy=new Date().toLocaleDateString('es-AR');
+  // Insert conversion box before content
+  const existing=tc.innerHTML;
+  tc.innerHTML=`
+    <div class="cvt-box">
+      <label>📁 Convertir RIC-58 "${es(ric.numero)}" → Expediente</label>
+      <p style="font-size:.7rem;color:var(--ve);margin-bottom:.45rem">Ingresá el número de expediente que fue asignado:</p>
+      <input id="cvtNum" placeholder="Ej: 1234/2025" style="width:100%;background:#fff;border:1.5px solid var(--veba);border-radius:6px;padding:.45rem .6rem;font-size:.85rem;margin-bottom:.5rem">
+      <div style="display:flex;gap:.4rem">
+        <button class="btn bve" onclick="confirmarConversion(${id})">✅ Confirmar</button>
+        <button class="btn bgr" onclick="openMod('ric58')">✕ Cancelar</button>
+      </div>
+    </div>
+    <div style="opacity:.4;pointer-events:none">${existing}</div>`;
+  tc.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const el=document.getElementById('cvtNum');if(el)el.focus()},200);
+}
+
+async function confirmarConversion(id){
+  const numEl=document.getElementById('cvtNum');
+  const numExp=(numEl?.value||'').trim();
+  if(!numExp){toast('Ingresá el número de expediente','er');return}
+  const all=await getAll('ric58');
+  const ric=all.find(r=>r.id===id);if(!ric)return;
+  const hoy=new Date().toLocaleDateString('es-AR');
+  // Create expediente
+  const exp={
+    id:Date.now(),numero:numExp,servicio:ric.servicio,subServicio:ric.subServicio||'',
+    descripcion:ric.descripcion,fechaInicio:hoy,estado:'Iniciado',
+    responsable:user?.n||'',usuario:user?.n||'',mod:hoy,
+    origenRic58:ric.numero
+  };
+  await put('expedientes',exp);
+  // Update ric58 as converted (don't delete, archive it)
+  const updated={...ric,estado:'Convertido a Expediente',expGenerado:numExp,mod:hoy};
+  await put('ric58',updated);
+  toast('✅ RIC-58 convertido · Expediente '+numExp+' creado','ok');
+  await openMod('ric58');
+  await updateModCounts();
+}
+
+// ── COMPRAS / OC ──
+async function modCompras(tc){
+  const all=await getAll('compras');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  // OC Sin Oferentes → max priority at top
+  const urgentes=rows.filter(c=>c.tipo==='Orden de Provisión (OC)'&&c.estadoOC==='Sin Oferentes');
+  const activos=rows.filter(c=>!(c.tipo==='Orden de Provisión (OC)'&&(c.estadoOC==='Entregado'||c.estadoOC==='Baja'))&&!urgentes.includes(c));
+  const archivados=rows.filter(c=>c.tipo==='Orden de Provisión (OC)'&&(c.estadoOC==='Entregado'||c.estadoOC==='Baja'));
+
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('compra')">+ Nueva Compra / OC</button>
+      <div class="sp"></div>
+      ${urgentes.length?`<span class="bx bro">🚨 ${urgentes.length} Sin Oferentes</span>`:''}
+    </div>
+    ${urgentes.length?`
+      <div class="stitle" style="color:var(--ro)">🚨 MÁXIMA PRIORIDAD · Sin Oferentes (${urgentes.length})</div>
+      ${urgentes.map(c=>`
+        <div class="oc-urgent">
+          <div class="uc">
+            <div class="utag">🚨 SIN OFERENTES — RE-GESTIONAR</div>
+            <b style="font-size:.78rem">${es(c.descripcion)}</b>
+            ${c.nroc?`<br><span style="font-size:.65rem;color:var(--dim)">OC N°: ${es(c.nroc)}</span>`:''}
+            <div style="font-size:.63rem;color:var(--dim);margin-top:.18rem">${c.fecha||'—'} · ${es(c.usuario)}</div>
+          </div>
+          <div class="arow">
+            <button class="ab" onclick="editR('compra',${c.id})">✏️</button>
+            <button class="ab" onclick="delR('compra',${c.id})">🗑</button>
+          </div>
+        </div>`).join('')}
+    `:''}
+    ${!rows.length?`<div class="emp"><div class="ei">🛒</div>Sin compras registradas.</div>`:''}
+    ${activos.length?`<div class="stitle">Activas (${activos.length})</div>
+      <div class="tw" style="margin-bottom:.55rem"><table>
+      <thead><tr><th>Descripción</th><th>Tipo</th><th>Estado OC</th><th>N° OC</th><th>Fecha</th><th></th></tr></thead>
+      <tbody>${activos.map(c=>{
+        const tipoBadge=c.tipo==='Orden de Provisión (OC)'?`<span class="pill ppu">OC</span>`:c.tipo==='Caja Chica'?`<span class="pill pgold">💰 Caja Chica</span>`:`<span class="pill pin">🔧 Reparación</span>`;
+        const ocEst=c.tipo==='Orden de Provisión (OC)'?pill(c.estadoOC,'oc'):'—';
+        return`<tr>
+          <td style="font-size:.71rem;max-width:140px">${es(c.descripcion)}</td>
+          <td>${tipoBadge}</td>
+          <td>${ocEst}</td>
+          <td style="font-size:.65rem">${es(c.nroc||'—')}</td>
+          <td style="font-size:.63rem">${c.fecha||'—'}</td>
+          <td><div class="arow">
+            <button class="ab" onclick="editR('compra',${c.id})">✏️</button>
+            <button class="ab" onclick="delR('compra',${c.id})">🗑</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`:''}
+    ${archivados.length?`<div class="stitle" style="color:var(--dim)">Archivadas · Entregadas/Bajas (${archivados.length})</div>
+      <div class="tw"><table>
+      <thead><tr><th>Descripción</th><th>Tipo</th><th>Estado</th><th>N° OC</th><th>Fecha</th><th></th></tr></thead>
+      <tbody>${archivados.map(c=>`<tr style="opacity:.6">
+        <td style="font-size:.7rem;max-width:140px">${es(c.descripcion)}</td>
+        <td><span class="pill ppu">OC</span></td>
+        <td>${pill(c.estadoOC,'oc')}</td>
+        <td style="font-size:.64rem">${es(c.nroc||'—')}</td>
+        <td style="font-size:.63rem">${c.fecha||'—'}</td>
+        <td><div class="arow"><button class="ab" onclick="delR('compra',${c.id})">🗑</button></div></td>
+      </tr>`).join('')}</tbody></table></div>`:''}`;
+}
+
+// ── ÓRDENES ──
+async function modOr(tc){
+  const all=await getAll('ordenes');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  const hoy=today();
+  if(!rows.length){tc.innerHTML=`<div class="tbar"><button class="btn baz2" onclick="openForm('orden')">+ Agregar</button></div><div class="emp"><div class="ei">🔧</div>Sin órdenes. Importá <b>orden.xlsx</b>.</div>`;return}
+  tc.innerHTML=`
+    <div class="tbar"><button class="btn baz2" onclick="openForm('orden')">+ Agregar</button><div class="sp"></div><span class="bx baz">${rows.length}</span></div>
+    <div class="tbar"><input class="fi" type="text" placeholder="Buscar N° u orden..." oninput="ft('orT',this.value)"></div>
+    <div class="tw"><table id="orT">
+    <thead><tr><th>N° Orden</th><th>Descripción</th><th>Inicio</th><th>Días</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${rows.map(o=>{
+      const fi=toD(o.fechaInicio),d=diff(fi,hoy);
+      return`<tr><td><b>${es(o.numero)}</b></td><td style="max-width:130px;font-size:.68rem">${es(o.descripcion)}</td>
+        <td style="font-size:.63rem">${fd(fi)}</td>
+        <td><span class="dc" style="background:var(--nali);color:var(--na);border:1px solid var(--naba)">${d!==null?d+'d':'—'}</span></td>
+        <td>${pill(o.estado,'or')}</td>
+        <td><div class="arow">
+          <button class="ab" onclick="editR('orden',${o.id})">✏️</button>
+          <button class="ab" onclick="delR('orden',${o.id})">🗑</button>
+        </div></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+// ── ACTAS ──
+async function modAc(tc){
+  const all=await getAll('actas');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  tc.innerHTML=`
+    <div class="tbar"><button class="btn baz2" onclick="openForm('acta')">+ Nueva Acta</button><div class="sp"></div><span class="bx baz">${rows.length}</span></div>
+    ${!rows.length?`<div class="emp"><div class="ei">📄</div>Sin actas.</div>`:`
+    <div class="tw"><table><thead><tr><th>Equipo</th><th>Tipo</th><th>Destino</th><th>Fecha</th><th></th></tr></thead>
+    <tbody>${rows.map(a=>`<tr>
+      <td><b style="font-size:.71rem">${es(a.equipo)}</b></td>
+      <td><span class="pill pin">${es(a.tipo)}</span></td>
+      <td style="font-size:.65rem">${es(a.destino)}</td>
+      <td style="font-size:.62rem">${a.fecha||'—'}</td>
+      <td><div class="arow">
+        <button class="ab" onclick="editR('acta',${a.id})">✏️</button>
+        <button class="ab" onclick="delR('acta',${a.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`}`;
+}
+
+// ── BAJAS ──
+async function modBa(tc){
+  const all=await getAll('bajas');
+  const rows=all.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+  // Separar: pendientes de eliminar en SKINET vs ya registradas
+  const pendSkinet=rows.filter(b=>b.skinetPendiente&&!b.skinetOk);
+  const yaRegistradas=rows.filter(b=>!b.skinetPendiente||b.skinetOk);
+  tc.innerHTML=`
+    <div class="tbar">
+      <button class="btn baz2" onclick="openForm('baja')">+ Dar de Baja</button>
+      <div class="sp"></div>
+      ${pendSkinet.length?`<span class="bx bro" style="font-size:.62rem">⚠ ${pendSkinet.length} pend. SKINET</span>`:''}
+      <span class="bx bdim" style="font-size:.62rem">${rows.length} total</span>
+    </div>
+    ${pendSkinet.length?`
+      <div class="alertbx" style="margin-bottom:.5rem">⚠️ <b>${pendSkinet.length} equipo${pendSkinet.length>1?'s':''}</b> dado${pendSkinet.length>1?'s':''} de baja pendiente${pendSkinet.length>1?'s':''} de eliminar en SKINET</div>
+      <div class="tw" style="margin-bottom:.7rem"><table>
+        <thead><tr><th>Equipo</th><th>Serie</th><th>Motivo</th><th>Fecha</th><th></th></tr></thead>
+        <tbody>${pendSkinet.map(b=>`<tr style="background:var(--roli)">
+          <td>
+            <b style="font-size:.72rem">${es(b.equipo)}</b>
+            ${b.marca?`<br><span style="font-size:.61rem;color:var(--dim)">${es(b.marca)}</span>`:''}
+            ${b.observaciones?`<br><span style="font-size:.6rem;color:var(--dim)">${es(b.observaciones)}</span>`:''}
+          </td>
+          <td style="font-size:.63rem">${es(b.serie)||'—'}</td>
+          <td><span class="pill pal">${es(b.motivo)}</span></td>
+          <td style="font-size:.62rem">${b.fecha||'—'}</td>
+          <td><div class="arow">
+            <button class="ab" style="background:var(--veli);color:var(--ve2);border-color:var(--veba);font-weight:700" onclick="marcarBajaSKINET(${b.id})" title="Confirmar que se eliminó en SKINET">📱 SKINET ✓</button>
+            <button class="ab" onclick="editR('baja',${b.id})">✏️</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`:''}
+    ${yaRegistradas.length?`
+      <div class="stitle" style="color:var(--dim)">🗃 Historial de bajas (${yaRegistradas.length})</div>
+      <div class="tw"><table>
+        <thead><tr><th>Equipo</th><th>Motivo</th><th>SKINET</th><th>Fecha</th><th></th></tr></thead>
+        <tbody>${yaRegistradas.map(b=>`<tr>
+          <td>
+            <b style="font-size:.71rem">${es(b.equipo)}</b>
+            ${b.serie?`<br><span style="font-size:.6rem;color:var(--dim)">${es(b.serie)}</span>`:''}
+          </td>
+          <td><span class="pill pal">${es(b.motivo)}</span></td>
+          <td>${b.skinetOk?'<span class="pill pok">✓</span>':'<span class="pill pdim">—</span>'}</td>
+          <td style="font-size:.62rem">${b.fecha||'—'}</td>
+          <td><div class="arow">
+            <button class="ab" onclick="editR('baja',${b.id})">✏️</button>
+            <button class="ab" onclick="delR('baja',${b.id})">🗑</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`:''}
+    ${!rows.length?`<div class="emp"><div class="ei">🗑️</div>Sin bajas registradas.</div>`:''}`;
+}
+
+async function marcarBajaSKINET(id){
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const all=await getAll('bajas');
+  const b=all.find(r=>r.id===id);if(!b)return;
+  await put('bajas',{...b,skinetOk:true,skinetPendiente:false,fechaSkinet:hoy});
+  toast('Baja confirmada en SKINET ✔','ok');
+  await refreshView();
+}
+
+function ft(id,v){const tbl=document.getElementById(id);if(!tbl)return;const lv=v.toLowerCase();tbl.querySelectorAll('tbody tr').forEach(tr=>{tr.style.display=!v||tr.textContent.toLowerCase().includes(lv)?'':'none'})}
+
+// ════════════════════════════════════
+// STOCK
+// ════════════════════════════════════
+async function showStock(){showView('stockPanel');await renderStock('')}
+async function renderStock(f=''){
+  const all=await getAll('stock');
+  const rows=f?all.filter(s=>(s.descrip||'').toLowerCase().includes(f.toLowerCase())):all;
+  const el=g('stkCont');
+  if(!rows.length){el.innerHTML=`<div class="emp"><div class="ei">📦</div>${f?'Sin coincidencias':'Sin stock. Importá <b>Stock_actual.xlsx</b>'}</div>`;return}
+  el.innerHTML=`<div class="sg">${rows.map(s=>{const c=Number(s.stock)||0,cls=c<=0?'zr':c<=2?'lw':'ok-s';return`<div class="si ${cls}"><h4>${es(s.descrip)}</h4><div class="sn2"><span>In: <b>${s.cantIn||0}</b></span><span>Out: <b>${s.cantOut||0}</b></span><span>Stk: <b style="color:${c<=0?'var(--ro)':c<=2?'var(--na)':'var(--ve2)'}">${c}</b></span></div></div>`}).join('')}</div>`;
+}
+
+// ════════════════════════════════════
+// ADMIN / IMPORT
+// ════════════════════════════════════
+async function showAdmin(){showView('adminPanel');g('prev').style.display='none';await loadDates()}
+async function loadDates(){
+  try{
+    const[eq,ex,or,st]=await Promise.all(['eq','ex','or','st'].map(k=>getMeta('lu_'+k)));
+    const f=v=>v?`Importado: ${v}`:'Sin datos';
+    g('luEq').textContent=f(eq);g('luEx').textContent=f(ex);g('luOr').textContent=f(or);g('luSt').textContent=f(st);
+  }catch(e){}
+}
+function dov(e,el){e.preventDefault();el.classList.add('drag')}
+function dlv(el){el.classList.remove('drag')}
+function ddf(e,k){e.preventDefault();e.currentTarget.classList.remove('drag');const f=e.dataTransfer?.files?.[0];if(f)procFile(f,k)}
+function loadXLS(inp,k){const f=inp.files?.[0];if(f)procFile(f,k);inp.value=''}
+
+function procFile(file,k){
+  if(!file.name.endsWith('.xlsx')){toast('Solo .xlsx','er');return}
+  const rd=new FileReader();
+  rd.onload=async e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const raw=XLSX.utils.sheet_to_json(ws,{raw:false,dateNF:'yyyy-mm-dd'});
+      if(!raw.length){toast('Archivo vacío','er');return}
+      const parsed=parseXLS(k,raw);
+      if(!parsed.length){toast('No se reconocieron columnas','er');return}
+      const res=await smartMerge(k,parsed);
+      pending={k,data:res.merged};
+      showPrev(k,res);
+    }catch(er){toast('Error: '+er.message,'er')}
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+function rv(r,...keys){for(const k of keys){if(r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return String(r[k]).trim()}return''}
+
+function parseXLS(k,rows){
+  const now=new Date().toLocaleDateString('es-AR'),u=user?.n||'';
+  switch(k){
+    case'eq':return rows.map((r,i)=>({
+      id:Date.now()+i,
+      descrip:rv(r,'Descrip','DESCRIP','descrip'),
+      marca:rv(r,'Marca - Modelo','Marca-Modelo','Marca','marca'),
+      serie:rv(r,'Nº Serie','N° Serie','Serie','serie'),
+      servicio:nSrv(rv(r,'Servicio','SERVICIO','servicio')),
+      subServicio:rv(r,'Sub Servicio','Sub servicio','subServicio'),
+      area:rv(r,'Area','AREA')||'AREA 6',
+      estado:rv(r,'Estado','ESTADO')||'En Servicio',
+      ultimoMant:rv(r,'Ultimo Mantenimiento','Ultimo Mantemiento','ultimoMant'),
+      periodo:rv(r,'Periodo','periodo'),
+      proximoMant:rv(r,'Proximo Mantenimiento','Próximo Mantenimiento','proximoMant'),
+      tipoEq:'Hospital',usuario:u,importado:now
+    })).filter(r=>r.descrip);
+    case'ex':return rows.map((r,i)=>({
+      id:Date.now()+i,
+      servicio:nSrv(rv(r,'Servicio','SERVICIO')),
+      subServicio:rv(r,'Sub Servicio','Sub servicio','subServicio'),
+      numero:rv(r,'N° Expediente','N Expediente','numero'),
+      fechaInicio:rv(r,'Fecha de Inicio','Fecha Inicio','fechaInicio'),
+      descripcion:rv(r,'Descripcion','Descripción','descripcion'),
+      estado:rv(r,'Estado','ESTADO')||'En Trámite',
+      responsable:rv(r,'Responsable','responsable'),
+      usuario:u,importado:now
+    })).filter(r=>r.numero);
+    case'or':return rows.map((r,i)=>({
+      id:Date.now()+i,
+      servicio:nSrv(rv(r,'Servicio','SERVICIO')),
+      subServicio:rv(r,'Sub Servicio','Sub servicio','subServicio'),
+      numero:rv(r,'N° Orden','N Orden','numero'),
+      fechaInicio:rv(r,'Fecha de Inicio','Fecha Inicio','fechaInicio'),
+      descripcion:rv(r,'Descripcion','Descripción','descripcion'),
+      estado:rv(r,'Estado','ESTADO')||'Iniciada',
+      responsable:rv(r,'Responsable','responsable'),
+      usuario:u,importado:now
+    })).filter(r=>r.numero);
+    case'st':return rows.map((r,i)=>({
+      id:Date.now()+i,
+      area:rv(r,'Area','AREA')||'AREA 6',
+      descrip:rv(r,'Descrip','DESCRIP','descrip'),
+      cantIn:Number(rv(r,'SumaDeCantidad_in','Cantidad_in')||0),
+      cantOut:Number(rv(r,'SumaDeCantidad_out','Cantidad_out')||0),
+      stock:Number(rv(r,'Stock','stock')||0),
+      usuario:u,importado:now
+    })).filter(r=>r.descrip);
+    default:return[];
+  }
+}
+
+// SMART MERGE: equipos merge normally; ric58/expedientes/tareas always preserved
+async function smartMerge(k,newData){
+  const KS2={eq:'equipos',ex:'expedientes',or:'ordenes',st:'stock'};
+  const existing=await getAll(KS2[k]);
+
+  // Stock: always replace
+  if(k==='st')return{merged:newData,fromExcel:newData.length,fromApp:0,conflicts:[]};
+
+  // Expedientes & ordenes: NEVER overwrite manually added (has .mod flag)
+  // Only add new records from Excel that don't exist in app
+  const KEY={eq:'serie',ex:'numero',or:'numero'};
+  const keyF=KEY[k];
+  const exMap={};existing.forEach(r=>{const kv=(r[keyF]||'').trim();if(kv)exMap[kv]=r});
+  const merged=[];let fromExcel=0,fromApp=0;const conflicts=[];
+
+  newData.forEach(nr=>{
+    const kv=(nr[keyF]||'').trim();
+    const er=exMap[kv];
+    if(!kv||!er){merged.push(nr);fromExcel++;if(kv)delete exMap[kv];}
+    else{
+      let winner=nr,reason='Excel';
+      if(k==='eq'){
+        // Smart merge for equipment
+        if(er.mod){winner=er;reason='App (editado manualmente)'}
+        else{
+          const ad=toD(er.ultimoMant),nd=toD(nr.ultimoMant);
+          if(ad&&nd&&ad>nd){winner=er;reason='App (mant. más reciente)'}
+          else if(ad&&!nd){winner=er;reason='App (tiene mantenimiento)'}
+        }
+        // Preserve manually-added fields (proveedor, fechaCompra, garantia, tipoEq)
+        const kept={...nr,...winner,id:er.id};
+        if(er.proveedor)kept.proveedor=er.proveedor;
+        if(er.fechaCompra)kept.fechaCompra=er.fechaCompra;
+        if(er.garantiaMeses)kept.garantiaMeses=er.garantiaMeses;
+        if(er.tipoEq&&er.tipoEq!=='Hospital')kept.tipoEq=er.tipoEq;
+        merged.push(kept);
+      } else {
+        // ex/or: preserve app edits completely
+        if(er.mod){winner=er;reason='App (editado manualmente)'}
+        merged.push({...nr,...winner,id:er.id});
+      }
+      if(winner===er){fromApp++;conflicts.push({campo:kv,motivo:reason})}else fromExcel++;
+      delete exMap[kv];
+    }
+  });
+  // Items only in app → keep them
+  Object.values(exMap).forEach(r=>{merged.push(r);fromApp++});
+  return{merged,fromExcel,fromApp,conflicts};
+}
+
+const KLABEL={eq:'🩺 Equipos',ex:'📁 Expedientes',or:'📋 Órdenes',st:'📦 Stock'};
+const KS={eq:'equipos',ex:'expedientes',or:'ordenes',st:'stock'};
+const KC={eq:['descrip','subServicio','servicio','estado','proximoMant'],ex:['numero','servicio','descripcion','estado'],or:['numero','servicio','descripcion','estado'],st:['descrip','stock','cantIn','cantOut']};
+
+function showPrev(k,r){
+  const{merged,fromExcel,fromApp,conflicts}=r;
+  g('prevTit').textContent=`Vista previa · ${KLABEL[k]} · ${merged.length} registros`;
+  g('prevSt').innerHTML=[`<div class="ps">Total: <b>${merged.length}</b></div>`,`<div class="ps">Del Excel: <b>${fromExcel}</b></div>`,`<div class="ps">App preservados: <b>${fromApp}</b></div>`].join('');
+  let mi='';
+  if(conflicts.length){
+    mi=`<div style="font-size:.71rem;font-weight:700;color:var(--na);margin-bottom:.28rem">⚠ ${conflicts.length} registros de App conservados (más actualizados)</div>`;
+    mi+=conflicts.slice(0,4).map(c=>`<div class="merge-row">🔒 ${es(c.campo)} → ${es(c.motivo)}</div>`).join('');
+    if(conflicts.length>4)mi+=`<div style="font-size:.66rem;color:var(--dim)">...y ${conflicts.length-4} más</div>`;
+    mi+=`<div class="warnbx">📱 Verificar y actualizar <b>SKINET</b> con datos desincronizados.</div>`;
+  }
+  g('mergeInfo').innerHTML=mi;
+  const cols=KC[k]||[],prows=merged.slice(0,7);
+  g('prevTbl').innerHTML=`<div style="font-size:.64rem;color:var(--dim);margin-bottom:.22rem">Primeros ${prows.length} de ${merged.length}</div>
+    <table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${prows.map(r=>`<tr>${cols.map(c=>`<td style="font-size:.66rem;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r[c]||'—'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  g('prev').style.display='block';g('prev').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function doImport(){
+  if(!pending.k)return;
+  showLoad('Importando datos...');
+  try{
+    const{k,data}=pending;
+    await clr(KS[k]);await bulkPut(KS[k],data);
+    await setMeta('lu_'+k,new Date().toLocaleString('es-AR'));
+    toast(`✅ ${data.length} registros importados`,'ok');
+    pending={};g('prev').style.display='none';
+    await loadDates();await renderDash();await checkAlerts();
+  }finally{hideLoad()}
+}
+function cancelPrev(){pending={};g('prev').style.display='none'}
+async function dbSt(){
+  const cnts=await Promise.all(['equipos','expedientes','ric58','ordenes','actas','tareas','compras','bajas','stock'].map(async s=>{const r=await getAll(s);return`<b>${s}</b>:${r.length}`}));
+  g('dbSC').innerHTML=cnts.join(' · ');
+}
+function clearAll(){
+  cfm2('⚠️ ¿Borrar TODOS los datos locales?\nNo se puede deshacer.',async()=>{
+    await Promise.all(STORES.map(s=>clr(s)));toast('Datos borrados','ok');goHome();await renderDash();
+  });
+}
+
+// ════════════════════════════════════
+// FORM PANEL
+// ════════════════════════════════════
+async function openForm(type,data=null){
+  fmType=type;fmMode=data?'edit':'new';fmId=data?.id||null;
+  const d=data||{};
+  const srv=d.servicio||curSrv||'';
+  const sub=d.subServicio||curSubSrv===PEDIDOS_GEN?'':curSubSrv||'';
+  const sOpts=SRVS.map(s=>`<option value="${s.id}" ${nSrv(s.id)===nSrv(srv)?'selected':''}>${s.ico} ${s.lb}</option>`).join('');
+  const TITLES={equipo:'🩺 Equipo',expediente:'📁 Expediente',ric58:'📋 RIC-58',orden:'🔧 Orden de Trabajo',acta:'📄 Acta',tarea:'✅ Tarea',compra:'🛒 Compra / OC',baja:'🗑️ Baja RIC-44',stock:'📦 Stock'};
+  g('fptit').textContent=(data?'Editar ':'Nuevo ')+TITLES[type];
+  let html='';
+
+  // Common service + sub-service fields
+  const srvSub=(overrideSub)=>`
+    <div class="fg"><label>Servicio</label><select id="fSrv">${sOpts}</select></div>
+    <div class="fg"><label>Sub Servicio</label><input id="fSS" value="${es(overrideSub!==undefined?overrideSub:sub)}" placeholder="Ej: Citología, UCI..."></div>`;
+
+  switch(type){
+    case'equipo':{
+      const eqs=await getAll('equipos');const eSrv=eqs.filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+      html=`
+        ${eSrv.length&&!data?`<div class="fg"><label>Copiar desde equipo existente</label><select onchange="fillEq(this.value)"><option value="">— Equipo nuevo —</option>${eSrv.map(e=>`<option value="${e.id}">${es(e.descrip)} | S/N: ${es(e.serie)}</option>`).join('')}</select></div>`:''}
+        <div class="fg"><label>Descripción *</label><input id="fD" value="${es(d.descrip)}"></div>
+        <div class="fg2">
+          <div class="fg"><label>Marca/Modelo</label><input id="fM" value="${es(d.marca)}"></div>
+          <div class="fg"><label>N° Serie</label><input id="fSer" value="${es(d.serie)}"></div>
+        </div>
+        <div class="fg2">
+          <div class="fg"><label>Tipo</label><select id="fTipoEq">${TIPOS_EQ.map(t=>`<option ${(d.tipoEq||'Hospital')===t?'selected':''}>${t}</option>`).join('')}</select></div>
+          <div class="fg"><label>Estado</label><select id="fEst">${EST_EQ.map(s=>`<option ${d.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        ${srvSub(d.subServicio)}
+        <div class="fg2">
+          <div class="fg"><label>Último Mant.</label><input id="fUM" type="date" value="${dv(d.ultimoMant)}"></div>
+          <div class="fg"><label>Próximo Mant.</label><input id="fPM" type="date" value="${dv(d.proximoMant)}"></div>
+        </div>
+        <div class="fg"><label>Proveedor / Quién entregó</label><input id="fProv" value="${es(d.proveedor)}" placeholder="Nombre del proveedor..."></div>
+        <div class="fg2">
+          <div class="fg"><label>Fecha de Compra</label><input id="fFC" type="date" value="${dv(d.fechaCompra)}"></div>
+          <div class="fg"><label>Garantía (meses)</label><input id="fGar" type="number" value="${d.garantiaMeses||12}" min="1" max="120"></div>
+        </div>`;
+      break;}
+    case'expediente':
+      html=`
+        <div class="fg"><label>N° Expediente *</label><input id="fNum" value="${es(d.numero)}"></div>
+        ${srvSub(d.subServicio)}
+        <div class="fg"><label>Descripción *</label><textarea id="fDesc">${es(d.descripcion)}</textarea></div>
+        <div class="fg2">
+          <div class="fg"><label>Fecha de Inicio</label><input id="fFI" type="date" value="${dv(d.fechaInicio)}"></div>
+          <div class="fg"><label>Estado</label><select id="fEst">${EST_EX.map(s=>`<option ${d.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        <div class="fg"><label>Responsable</label><input id="fResp" value="${es(d.responsable||user?.n)}"></div>`;
+      break;
+    case'ric58':
+      html=`
+        <div class="fg"><label>N° RIC-58 *</label><input id="fNum" value="${es(d.numero)}" placeholder="Ej: RIC58-2025-001"></div>
+        ${srvSub(d.subServicio)}
+        <div class="fg"><label>Descripción *</label><textarea id="fDesc">${es(d.descripcion)}</textarea></div>
+        <div class="fg2">
+          <div class="fg"><label>Fecha de Envío</label><input id="fFI" type="date" value="${dv(d.fechaEnvio)}"></div>
+          <div class="fg"><label>Estado</label><select id="fEst">${EST_RIC58.filter(s=>s!=='Convertido a Expediente').map(s=>`<option ${d.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        <div class="fg"><label>Observaciones</label><textarea id="fObs">${es(d.observaciones)}</textarea></div>`;
+      break;
+    case'compra':
+      html=`
+        <div class="fg"><label>Descripción *</label><textarea id="fDesc">${es(d.descripcion)}</textarea></div>
+        ${srvSub(d.subServicio)}
+        <div class="fg"><label>Tipo de Compra</label>
+          <select id="fTipoC" onchange="toggleOCFields(this.value)">${TIPOS_COMPRA.map(t=>`<option ${d.tipo===t?'selected':''}>${t}</option>`).join('')}</select></div>
+        <div id="ocFields" style="${d.tipo==='Orden de Provisión (OC)'||!d.tipo?'':'display:none'}">
+          <div class="fg2">
+            <div class="fg"><label>N° de OC</label><input id="fNroc" value="${es(d.nroc)}" placeholder="N° Orden de Compra"></div>
+            <div class="fg"><label>Estado OC</label><select id="fEstOC">${EST_OC.map(s=>`<option ${d.estadoOC===s?'selected':''}>${s}</option>`).join('')}</select></div>
+          </div>
+        </div>
+        <div class="fg"><label>Observaciones</label><input id="fObs" value="${es(d.observaciones)}" placeholder="Detalles adicionales..."></div>`;
+      break;
+    case'orden':
+      html=`
+        <div class="fg"><label>N° Orden *</label><input id="fNum" value="${es(d.numero)}"></div>
+        ${srvSub(d.subServicio)}
+        <div class="fg"><label>Descripción *</label><textarea id="fDesc">${es(d.descripcion)}</textarea></div>
+        <div class="fg2">
+          <div class="fg"><label>Fecha de Inicio</label><input id="fFI" type="date" value="${dv(d.fechaInicio)}"></div>
+          <div class="fg"><label>Estado</label><select id="fEst">${EST_OR.map(s=>`<option ${d.estado===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        </div>
+        <div class="fg"><label>Responsable</label><input id="fResp" value="${es(d.responsable||user?.n)}"></div>`;
+      break;
+    case'acta':{
+      const eqsA=(await getAll('equipos')).filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+      html=`
+        <div class="fg"><label>Equipo *</label>
+          ${eqsA.length?`<select id="fEq"><option value="">— Seleccioná —</option>${eqsA.map(e=>`<option value="${es(e.descrip)}" ${d.equipo===e.descrip?'selected':''}>${es(e.descrip)} · ${es(e.serie)}</option>`).join('')}</select>`:`<input id="fEq" value="${es(d.equipo)}">`}</div>
+        ${srvSub(d.subServicio)}
+        <div class="fg2">
+          <div class="fg"><label>Tipo</label><select id="fTipo">${TIPOS_A.map(t=>`<option ${d.tipo===t?'selected':''}>${t}</option>`).join('')}</select></div>
+          <div class="fg"><label>Destino/Origen</label><input id="fDest" value="${es(d.destino)}"></div>
+        </div>
+        <div class="fg"><label>Observaciones</label><textarea id="fObs">${es(d.observaciones||d.descripcion)}</textarea></div>`;
+      break;}
+    case'tarea':
+      html=`
+        <div class="fg"><label>Tipo</label><select id="fTipo">${TIPOS_T.map(t=>`<option ${(d.tipo||'Tarea General')===t?'selected':''}>${t}</option>`).join('')}</select></div>
+        ${srvSub(d.subServicio)}
+        <div class="fg"><label>Descripción *</label><textarea id="fDesc">${es(d.descripcion)}</textarea></div>
+        <div class="fg"><label>Detalle / Notas</label><input id="fDet" value="${es(d.detalle)}" placeholder="Info adicional..."></div>
+        <div class="fg"><label>Registrado en SKINET</label>
+          <select id="fSk"><option value="0" ${!d.skinet?'selected':''}>⚠ No (Pendiente)</option><option value="1" ${d.skinet?'selected':''}>✓ Sí (Registrado)</option></select></div>`;
+      break;
+    case'baja':{
+      const eqsB=(await getAll('equipos')).filter(e=>mSrv(e.servicio,curSrv)&&matchSub(e));
+      html=`
+        <div class="fg"><label>Equipo *</label>
+          ${eqsB.length?`<select id="fEq"><option value="">— Seleccioná —</option>${eqsB.map(e=>`<option value="${es(e.descrip)}" ${d.equipo===e.descrip?'selected':''}>${es(e.descrip)} · ${es(e.serie)}</option>`).join('')}</select>`:`<input id="fEq" value="${es(d.equipo)}">`}</div>
+        <div class="fg"><label>Motivo</label><select id="fMot">${MOTIVOS.map(m=>`<option ${d.motivo===m?'selected':''}>${m}</option>`).join('')}</select></div>
+        <div class="fg"><label>Observaciones</label><textarea id="fObs">${es(d.observaciones||d.descripcion)}</textarea></div>`;
+      break;}
+    case'stock':
+      html=`
+        <div class="fg"><label>Descripción *</label><input id="fD" value="${es(d.descrip)}"></div>
+        <div class="fg2">
+          <div class="fg"><label>Entradas</label><input id="fIn" type="number" value="${d.cantIn||0}"></div>
+          <div class="fg"><label>Salidas</label><input id="fOut" type="number" value="${d.cantOut||0}"></div>
+        </div>
+        <div class="fg"><label>Stock actual</label><input id="fSt" type="number" value="${d.stock||0}"></div>`;
+      break;
+  }
+  g('fpbody').innerHTML=html;
+  // If compra form, check initial type for OC fields
+  if(type==='compra'){
+    const ti=document.getElementById('fTipoC');
+    if(ti)toggleOCFields(ti.value);
+  }
+  g('fp').classList.add('open');
+}
+
+function toggleOCFields(val){
+  const el=document.getElementById('ocFields');
+  if(el)el.style.display=val==='Orden de Provisión (OC)'?'block':'none';
+}
+
+async function fillEq(id){
+  if(!id)return;
+  const eqs=await getAll('equipos');const e=eqs.find(r=>r.id===Number(id));if(!e)return;
+  const s=(x,v)=>{const el=document.getElementById(x);if(el)el.value=v||''};
+  s('fD',e.descrip);s('fM',e.marca);s('fSer',e.serie);s('fSS',e.subServicio);
+  s('fUM',dv(e.ultimoMant));s('fPM',dv(e.proximoMant));
+  s('fProv',e.proveedor);s('fFC',dv(e.fechaCompra));s('fGar',e.garantiaMeses||12);
+  const te=document.getElementById('fTipoEq');if(te)te.value=e.tipoEq||'Hospital';
+  const est=document.getElementById('fEst');if(est)est.value=e.estado||'En Servicio';
+  fmId=e.id;fmMode='edit';
+}
+
+async function saveForm(){
+  const hoy=new Date().toLocaleDateString('es-AR'),u=user?.n||'';
+  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  let obj={},store='';
+  try{
+    switch(fmType){
+      case'equipo':{const d=gv('fD');if(!d){toast('Descripción requerida','er');return}
+        obj={descrip:d,marca:gv('fM'),serie:gv('fSer'),servicio:gv('fSrv'),subServicio:gv('fSS'),
+             tipoEq:gv('fTipoEq')||'Hospital',estado:gv('fEst'),ultimoMant:gv('fUM'),proximoMant:gv('fPM'),
+             proveedor:gv('fProv'),fechaCompra:gv('fFC'),garantiaMeses:Number(gv('fGar')||12),area:'AREA 6'};
+        store='equipos';break;}
+      case'expediente':{const n=gv('fNum');if(!n){toast('N° requerido','er');return}
+        obj={numero:n,servicio:gv('fSrv'),subServicio:gv('fSS'),descripcion:gv('fDesc'),fechaInicio:gv('fFI'),estado:gv('fEst'),responsable:gv('fResp')};
+        store='expedientes';break;}
+      case'ric58':{const n=gv('fNum');if(!n){toast('N° requerido','er');return}
+        obj={numero:n,servicio:gv('fSrv'),subServicio:gv('fSS'),descripcion:gv('fDesc'),fechaEnvio:gv('fFI'),estado:gv('fEst')||'Enviado',observaciones:gv('fObs')};
+        store='ric58';break;}
+      case'compra':{const d=gv('fDesc');if(!d){toast('Descripción requerida','er');return}
+        const tc=gv('fTipoC');
+        obj={descripcion:d,servicio:gv('fSrv'),subServicio:gv('fSS'),tipo:tc,
+             nroc:tc==='Orden de Provisión (OC)'?gv('fNroc'):'',
+             estadoOC:tc==='Orden de Provisión (OC)'?gv('fEstOC'):'',
+             observaciones:gv('fObs'),fecha:hoy};
+        store='compras';break;}
+      case'orden':{const n=gv('fNum');if(!n){toast('N° requerido','er');return}
+        obj={numero:n,servicio:gv('fSrv'),subServicio:gv('fSS'),descripcion:gv('fDesc'),fechaInicio:gv('fFI'),estado:gv('fEst'),responsable:gv('fResp')};
+        store='ordenes';break;}
+      case'acta':{const eq=gv('fEq');if(!eq){toast('Equipo requerido','er');return}
+        obj={equipo:eq,servicio:gv('fSrv'),subServicio:gv('fSS'),tipo:gv('fTipo'),destino:gv('fDest'),observaciones:gv('fObs'),fecha:hoy};
+        store='actas';break;}
+      case'tarea':{const td=gv('fDesc');if(!td){toast('Descripción requerida','er');return}
+        obj={tipo:gv('fTipo')||'Tarea General',descripcion:td,detalle:gv('fDet'),skinet:gv('fSk')==='1',servicio:gv('fSrv'),subServicio:gv('fSS'),fecha:hoy};
+        store='tareas';break;}
+      case'baja':{const eq=gv('fEq');if(!eq){toast('Equipo requerido','er');return}
+        obj={equipo:eq,motivo:gv('fMot'),observaciones:gv('fObs'),servicio:curSrv,subServicio:curSubSrv===PEDIDOS_GEN?'':curSubSrv||'',fecha:hoy};
+        store='bajas';break;}
+      case'stock':{const d=gv('fD');if(!d){toast('Descripción requerida','er');return}
+        obj={descrip:d,stock:Number(gv('fSt')||0),cantIn:Number(gv('fIn')||0),cantOut:Number(gv('fOut')||0),area:'AREA 6'};
+        store='stock';break;}
+    }
+    obj.usuario=u;obj.mod=hoy;
+    obj.id=(fmMode==='edit'&&fmId)?fmId:Date.now();
+    await put(store,obj);
+    closeForm();toast('Guardado ✓','ok');
+    if(_afterSaveCallback){const cb=_afterSaveCallback;_afterSaveCallback=null;await cb();}
+    else await refreshView();
+  }catch(e){toast('Error: '+e.message,'er')}
+}
+function closeForm(){g('fp').classList.remove('open');g('fpbody').innerHTML='';_afterSaveCallback=null;}
+
+async function editR(type,id){
+  const sm={equipo:'equipos',expediente:'expedientes',ric58:'ric58',orden:'ordenes',acta:'actas',tarea:'tareas',compra:'compras',baja:'bajas'};
+  const all=await getAll(sm[type]);const item=all.find(r=>r.id===id);
+  if(item)openForm(type,item);
+}
+async function delR(type,id){
+  const sm={equipo:'equipos',expediente:'expedientes',ric58:'ric58',orden:'ordenes',acta:'actas',tarea:'tareas',compra:'compras',baja:'bajas'};
+  cfm2('¿Eliminar este registro?\nNo se puede deshacer.',async()=>{
+    await del(sm[type],id);toast('Eliminado','ok');await refreshView();
+  });
+}
+async function refreshView(){
+  if(curMod)await openMod(curMod);
+  if(curSubSrv)await updateModCounts();
+  await renderDash();
+  if(curSrv&&!curSubSrv)await renderSubServices();
+}
+
+// ════════════════════════════════════
+// ALERTS
+// ════════════════════════════════════
+async function checkAlerts(){
+  try{
+    const eqs=await getAll('equipos');const hoy=today();
+    const vn=eqs.filter(e=>{const d=diff(hoy,toD(e.proximoMant));return d!==null&&d<0});
+    const pr=eqs.filter(e=>{const d=diff(hoy,toD(e.proximoMant));return d!==null&&d>=0&&d<30});
+    const b=g('alertBan');
+    if(vn.length||pr.length){
+      b.style.display='block';
+      b.innerHTML=`⚠️ <b>${vn.length} equipos</b> con mantenimiento VENCIDO · <b>${pr.length}</b> vencen en &lt;30 días`;
+    }else{b.style.display='none'}
+  }catch(e){}
+}
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+function showView(id){
+  ['dashView','serviceView','modView','stockPanel','adminPanel','globalView'].forEach(v=>{
+    const el=g(v);
+    if(el)el.style.display='none';
+  });
+  const el=g(id);
+  if(el){
+    el.style.display=id==='dashView'?'grid':'block';
+    if(id==='modView')el.style.display='block';
+  }
+  updateBreadcrumb();
+}
+
+function goHome(){
+  curSrv=null;curSubSrv=null;curMod=null;
+  showView('dashView');
+  renderDash();checkAlerts();
+}
+
+function updateBreadcrumb(){
+  const bc=g('breadcrumb');
+  const parts=[];
+  if(curSrv){
+    const s=SRVS.find(x=>x.id===curSrv);
+    if(s)parts.push({lb:`${s.ico} ${s.lb}`,fn:'goHome()',isCurrent:!curSubSrv});
+  }
+  if(curSubSrv){
+    const nm=curSubSrv===PEDIDOS_GEN?'Pedidos Generales':curSubSrv;
+    parts.push({lb:nm,fn:'goService()',isCurrent:!curMod});
+  }
+  if(!parts.length){bc.style.display='none';return}
+  bc.style.display='flex';
+  bc.innerHTML='<span class="bcrumb" onclick="goHome()">🏠 Inicio</span>'
+    +parts.map((p,i)=>`<span class="bsep">›</span><span class="${p.isCurrent?'':'bcrumb'}" ${p.isCurrent?'':'onclick="'+p.fn+'"'}>${p.lb}</span>`).join('');
+}
+
+// ════════════════════════════════════
+// CONFIRM / TOAST
+// ════════════════════════════════════
+function cfm2(msg,cb){g('cfmMsg').textContent=msg;g('cfm').classList.add('on');g('cfmOk').onclick=()=>{closeCfm();cb()}}
+function closeCfm(){g('cfm').classList.remove('on')}
+function toast(msg,type='ok'){
+  const el=document.createElement('div');el.className=`tm ${type}`;el.textContent=msg;
+  g('tst').appendChild(el);setTimeout(()=>el.remove(),2800);
+}
+
+// ════════════════════════════════════
+// UTILS
+// ════════════════════════════════════
+const g=id=>document.getElementById(id);
+function es(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function today(){const d=new Date();d.setHours(0,0,0,0);return d}
+function toD(v){
+  if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;
+  if(typeof v==='string'){let s=v.trim();if(s.includes('/')){const p=s.split('/');if(p.length===3)s=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`}const d=new Date(s);return isNaN(d)?null:d}
+  return null;
+}
+function fd(d){if(!d)return'—';const dt=d instanceof Date?d:toD(d);if(!dt)return'—';return dt.toLocaleDateString('es-AR')}
+function dv(v){const d=toD(v);if(!d)return'';try{return d.toISOString().split('T')[0]}catch{return''}}
+function diff(a,b){
+  if(!a||!b)return null;
+  const da=a instanceof Date?a:toD(a),db=b instanceof Date?b:toD(b);
+  if(!da||!db)return null;return Math.round((db-da)/864e5);
+}
+function dchip(d){
+  if(d===null)return'<span style="color:var(--dim);font-size:.64rem">—</span>';
+  if(d<0)return`<span class="dc" style="background:var(--roli);color:var(--ro);border:1px solid var(--roba)">${d}d</span>`;
+  if(d<30)return`<span class="dc" style="background:var(--nali);color:var(--na);border:1px solid var(--naba)">${d}d</span>`;
+  return`<span class="dc" style="background:var(--veli);color:var(--ve2);border:1px solid var(--veba)">${d}d</span>`;
+}
+function pill(v,t){
+  if(!v)return'<span class="pill pdim">—</span>';const lv=v.toLowerCase();
+  if(t==='eq'){if(lv==='en servicio')return`<span class="pill pok">${v}</span>`;if(lv.includes('fabrica')||lv.includes('repuesto'))return`<span class="pill pwn">${v}</span>`;if(lv.includes('deposito'))return`<span class="pill pin">${v}</span>`;return`<span class="pill pdim">${v}</span>`}
+  if(t==='ex'){if(lv==='aprobado')return`<span class="pill pok">${v}</span>`;if(lv==='iniciado')return`<span class="pill pin">${v}</span>`;if(lv.includes('trámite'))return`<span class="pill pwn">${v}</span>`;if(lv==='archivado'||lv==='rechazado')return`<span class="pill pdim">${v}</span>`;return`<span class="pill pin">${v}</span>`}
+  if(t==='or'){if(lv==='completada')return`<span class="pill pok">${v}</span>`;if(lv==='iniciada')return`<span class="pill pwn">${v}</span>`;if(lv==='en proceso')return`<span class="pill pin">${v}</span>`;if(lv==='cancelada')return`<span class="pill pal">${v}</span>`;return`<span class="pill pdim">${v}</span>`}
+  if(t==='oc'){if(lv==='entregado')return`<span class="pill pok">${v}</span>`;if(lv==='sin oferentes')return`<span class="pill pal">🚨 ${v}</span>`;if(lv==='pendiente')return`<span class="pill pwn">${v}</span>`;if(lv==='baja')return`<span class="pill pdim">${v}</span>`;return`<span class="pill pdim">${v}</span>`}
+  return`<span class="pill pdim">${v}</span>`;
+}
+function nSrv(s){
+  const u=(s||'').trim().toUpperCase();
+  if(GASTRO.includes(u))return'GASTROENTEROLOGIA';
+  const map={'PROCURACIÓN':'PROCURACION','HEMATOLOGÍA Y HEMOTERAPIA':'HEMATOLOGIA Y HEMOTERAPIA','NEUROCIRUGÍA':'NEUROCIRUGIA','NEUROLOGÍA':'NEUROLOGIA','ANATOMÍA PATOLÓGICA':'ANATOMIA PATOLOGICA','CLÍNICA MÉDICA':'CLINICA MEDICA'};
+  return map[u]||u;
+}
+function mSrv(a,b){return nSrv(a)===nSrv(b)}
+
+// ════════════════════════════════════
+// GLOBAL TAREAS VIEW
+// ════════════════════════════════════
+// ── Variantes G: misma lógica que modTa pero recargan la vista global ──
+async function cerrarTareaG(id){
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  await put('tareas',{...t,estado:'Cerrada',fechaCierre:hoy});
+  toast('Tarea cerrada ✔','ok');await showGlobalTareas();
+}
+async function marcarSkinetG(id){
+  const hoy=new Date().toLocaleDateString('es-AR');
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  await put('tareas',{...t,skinet:true,fechaSkinet:hoy});
+  toast('SKINET registrado ✔','ok');await showGlobalTareas();
+}
+async function archivarTareaG(id){
+  cfm2('¿Archivar esta tarea?\nQuedará en el historial de archivadas.',async()=>{
+    const all=await getAll('tareas');
+    const t=all.find(r=>r.id===id);if(!t)return;
+    await put('tareas',{...t,estado:'Archivada'});
+    toast('Tarea archivada','ok');await showGlobalTareas();
+  });
+}
+async function reabrirTareaG(id){
+  const all=await getAll('tareas');
+  const t=all.find(r=>r.id===id);if(!t)return;
+  const updated={...t};delete updated.estado;delete updated.fechaCierre;
+  await put('tareas',updated);
+  toast('Tarea reabierta','ok');await showGlobalTareas();
+}
+
+function openGlobalForm(type){
+  // Limpia servicio/subservicio para que el form no herede uno previo
+  curSrv=null;curSubSrv=null;
+  // Callback especial: al guardar, vuelve a la vista global
+  _afterSaveCallback=()=>showGlobalTareas();
+  openForm(type);
+}
+
+async function showGlobalTareas(){
+  showView('globalView');
+  curSrv=null;curSubSrv=null;curMod=null;
+  const el=g('globalContent');
+  el.innerHTML='<div style="color:var(--dim);font-size:.78rem;padding:.4rem">Cargando...</div>';
+  try{
+    const [tareas, rics, compras] = await Promise.all([
+      getAll('tareas'), getAll('ric58'), getAll('compras')
+    ]);
+    // Group tareas by service
+    const byServ={};
+    tareas.forEach(t=>{
+      const k=t.servicio||'Sin servicio';
+      if(!byServ[k])byServ[k]=[];
+      byServ[k].push(t);
+    });
+    let html='';
+    // Summary cards
+    const pending_sk=tareas.filter(t=>t.tipo==='RIC01'&&!t.skinet);
+    const ric58env=rics.filter(r=>r.estado==='Enviado');
+    const ocUrg=compras.filter(c=>c.tipo==='Orden de Provisión (OC)'&&c.estadoOC==='Sin Oferentes');
+    html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-bottom:.7rem">
+      <div style="background:var(--s1);border:1.5px solid var(--brd);border-radius:10px;padding:.6rem .5rem;text-align:center;box-shadow:var(--sh)">
+        <div style="font-size:1.2rem">✅</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--az)">${tareas.length}</div>
+        <div style="font-size:.62rem;color:var(--dim)">Tareas total</div>
+      </div>
+      <div style="background:${pending_sk.length?'var(--nali)':'var(--s1)'};border:1.5px solid ${pending_sk.length?'var(--naba)':'var(--brd)'};border-radius:10px;padding:.6rem .5rem;text-align:center;box-shadow:var(--sh)">
+        <div style="font-size:1.2rem">📱</div>
+        <div style="font-size:1.1rem;font-weight:700;color:${pending_sk.length?'var(--na)':'var(--ve2)'}">${pending_sk.length}</div>
+        <div style="font-size:.62rem;color:var(--dim)">Pend. SKINET</div>
+      </div>
+      <div style="background:${ocUrg.length?'var(--roli)':'var(--s1)'};border:1.5px solid ${ocUrg.length?'var(--roba)':'var(--brd)'};border-radius:10px;padding:.6rem .5rem;text-align:center;box-shadow:var(--sh)">
+        <div style="font-size:1.2rem">🚨</div>
+        <div style="font-size:1.1rem;font-weight:700;color:${ocUrg.length?'var(--ro)':'var(--ve2)'}">${ocUrg.length}</div>
+        <div style="font-size:.62rem;color:var(--dim)">OC Sin ofert.</div>
+      </div>
+    </div>`;
+
+    // RIC01 pending SKINET
+    if(pending_sk.length){
+      html+=`<div class="warnbx" style="margin-bottom:.6rem">⚠️ <b>${pending_sk.length} tareas RIC01</b> pendientes de registrar en SKINET:</div>`;
+      html+=`<div class="tw" style="margin-bottom:.7rem"><table>
+        <thead><tr><th>Descripción</th><th>Servicio</th><th>Fecha</th><th>Usuario</th></tr></thead>
+        <tbody>${pending_sk.map(t=>`<tr>
+          <td style="font-size:.72rem;max-width:160px">${es(t.descripcion)}</td>
+          <td style="font-size:.64rem">${es(t.servicio)}</td>
+          <td style="font-size:.63rem">${t.fecha||'—'}</td>
+          <td style="font-size:.63rem">${es(t.usuario)}</td>
+        </tr>`).join('')}</tbody></table></div>`;
+    }
+
+    // ── Tareas y Compras GENERALES (sin servicio asignado) ──
+    const tareasGen=tareas.filter(t=>!t.servicio||t.servicio==='General'||t.servicio===''||t.servicio==='Sin servicio');
+    const comprasGen=compras.filter(c=>!c.servicio||c.servicio==='General'||c.servicio===''||c.servicio==='Sin servicio');
+    const tgAbiertas=tareasGen.filter(t=>t.estado!=='Cerrada'&&t.estado!=='Archivada');
+    const tgCerradas=tareasGen.filter(t=>t.estado==='Cerrada');
+    const tgArchivadas=tareasGen.filter(t=>t.estado==='Archivada');
+    const tgPendSk=tgCerradas.filter(t=>t.tipo==='RIC01'&&!t.skinet);
+    if(tgAbiertas.length||tgCerradas.length||tgArchivadas.length||comprasGen.length){
+      html+=`<div class="stitle" style="color:var(--az);border-bottom:2px solid var(--az3);padding-bottom:.25rem;margin-bottom:.45rem">🏥 GENERALES · Sin servicio asignado</div>`;
+      if(tgPendSk.length){
+        html+=`<div class="warnbx" style="margin-bottom:.5rem">⚠️ <b>${tgPendSk.length} tarea${tgPendSk.length>1?'s':''} RIC01</b> cerrada${tgPendSk.length>1?'s':''} con SKINET pendiente.</div>`;
+      }
+      // Tarjetas con lógica completa: abierta → cerrar · cerrada+ric01 sin skinet → 📱 · cerrada+ok → archivar
+      const tgMostrar=[...tgAbiertas,...tgCerradas];
+      tgMostrar.forEach(t=>{
+        const tipo=t.tipo||'Tarea General';
+        const cerrada=t.estado==='Cerrada';
+        const esRic=tipo==='RIC01';
+        const skiPill=t.skinet?'<span class="pill pok">✓ SKINET</span>':'<span class="pill pwn">⚠ SKINET pend.</span>';
+        const tcls=cerrada?'co':esRic?'cr':'cg';
+        const tipoPill=cerrada
+          ?`<span class="pill pdim">🔒 Cerrada</span>`
+          :esRic?`<span class="pill pok">✅ RIC01</span>`
+          :`<span class="pill pin">📝 Tarea</span>`;
+        const puedeArchivar=cerrada&&(!esRic||t.skinet);
+        const botonesAct=!cerrada
+          ?`<button class="ab cvt" onclick="cerrarTareaG(${t.id})" title="Marcar trabajo hecho">✔</button>`
+          :(esRic&&!t.skinet)
+            ?`<button class="ab" style="background:var(--nali);color:var(--na);border-color:var(--naba)" onclick="marcarSkinetG(${t.id})" title="Registrado en SKINET">📱</button>
+              <button class="ab" onclick="reabrirTareaG(${t.id})" title="Reabrir">↩</button>`
+            :`<button class="ab" style="background:var(--veli);color:var(--ve2);border-color:var(--veba)" onclick="archivarTareaG(${t.id})" title="Archivar">🗃</button>
+              <button class="ab" onclick="reabrirTareaG(${t.id})" title="Reabrir">↩</button>`;
+        html+=`<div class="tcard ${tcls}" style="${cerrada?'opacity:.75;margin-bottom:.38rem':'margin-bottom:.38rem'}">
+          <div class="tcBody">
+            <div style="display:flex;gap:.28rem;flex-wrap:wrap;margin-bottom:.28rem">
+              ${tipoPill}${esRic?skiPill:''}
+            </div>
+            <p style="${cerrada?'text-decoration:line-through;color:var(--dim)':''}">${es(t.descripcion)}</p>
+            ${t.detalle?`<p style="color:var(--dim);font-size:.67rem;margin-top:.2rem">${es(t.detalle)}</p>`:''}
+            <div class="tmeta">${t.fecha||'—'} · ${es(t.usuario)}${cerrada&&t.fechaCierre?' · Cerrada: '+t.fechaCierre:''}</div>
+          </div>
+          <div class="tcAct">
+            ${botonesAct}
+            <button class="ab" onclick="curSrv=null;curSubSrv=null;editR('tarea',${t.id})">✏️</button>
+            ${puedeArchivar||!cerrada?`<button class="ab" onclick="delR('tarea',${t.id})">🗑</button>`:''}
+          </div>
+        </div>`;
+      });
+      // Compras generales
+      if(comprasGen.length){
+        html+=`<div class="stitle" style="margin-top:.5rem">🛒 Compras generales (${comprasGen.length})</div>`;
+        html+=`<div class="tw" style="margin-bottom:.7rem"><table>
+          <thead><tr><th>Tipo</th><th>Descripción</th><th>Estado OC</th><th>Fecha</th><th></th></tr></thead>
+          <tbody>${comprasGen.map(c=>{
+            const pill=c.tipo==='Orden de Provisión (OC)'?`<span class="pill ppu">OC</span>`:`<span class="pill pgold">Compra</span>`;
+            const ocSt=c.estadoOC?`<span class="pill ${c.estadoOC==='Sin Oferentes'?'pal':'pdim'}">${es(c.estadoOC)}</span>`:'—';
+            return`<tr>
+              <td>${pill}</td>
+              <td style="font-size:.72rem;max-width:150px">${es(c.descripcion)}${c.observaciones?`<br><span style="color:var(--dim);font-size:.62rem">${es(c.observaciones)}</span>`:''}</td>
+              <td>${ocSt}</td>
+              <td style="font-size:.62rem">${c.fecha||'—'}</td>
+              <td><div class="arow"><button class="ab" onclick="curSrv=null;curSubSrv=null;editR('compra',${c.id})">✏️</button><button class="ab" onclick="delR('compra',${c.id})">🗑</button></div></td>
+            </tr>`;
+          }).join('')}</tbody></table></div>`;
+      }
+      // Archivadas: historial colapsado
+      if(tgArchivadas.length){
+        html+=`<div class="stitle" style="color:var(--dim);margin-top:.3rem">🗃 Archivadas (${tgArchivadas.length})</div>`;
+        html+=`<div class="tw" style="margin-bottom:.7rem;opacity:.6"><table>
+          <thead><tr><th>Descripción</th><th>Tipo</th><th>Fecha cierre</th><th></th></tr></thead>
+          <tbody>${tgArchivadas.map(t=>`<tr>
+            <td style="font-size:.72rem;text-decoration:line-through;color:var(--dim)">${es(t.descripcion)}</td>
+            <td><span class="pill pdim">${t.tipo||'Tarea'}</span></td>
+            <td style="font-size:.62rem">${t.fechaCierre||t.fecha||'—'}</td>
+            <td><button class="ab" onclick="reabrirTareaG(${t.id})" title="Reabrir">↩</button></td>
+          </tr>`).join('')}</tbody></table></div>`;
+      }
+    }
+
+    // ── Tareas agrupadas por servicio ──
+    const srvKeys=Object.keys(byServ).filter(k=>k&&k!=='General'&&k!=='Sin servicio').sort();
+    srvKeys.forEach(srvKey=>{
+      const rows=byServ[srvKey];
+      if(!rows||!rows.length)return;
+      const srvInfo=SRVS.find(s=>mSrv(s.id,srvKey));
+      const abSrv=rows.filter(t=>t.estado!=='Archivada');
+      const archSrv=rows.filter(t=>t.estado==='Archivada');
+      html+=`<div class="stitle" style="margin-top:.3rem">${srvInfo?srvInfo.ico+' ':''} ${es(srvKey)} (${abSrv.length})</div>`;
+      abSrv.forEach(t=>{
+        const tipo=t.tipo||'Tarea General';
+        const cerrada=t.estado==='Cerrada';
+        const esRic=tipo==='RIC01';
+        const skiPill=t.skinet?'<span class="pill pok">\u2713 SKINET</span>':'<span class="pill pwn">\u26a0 SKINET pend.</span>';
+        const tcls=cerrada?'co':esRic?'cr':'cg';
+        const tipoPill=cerrada
+          ?`<span class="pill pdim">\ud83d\udd12 Cerrada</span>`
+          :esRic?`<span class="pill pok">\u2705 RIC01</span>`
+          :`<span class="pill pin">\ud83d\udcdd Tarea</span>`;
+        const puedeArchivar=cerrada&&(!esRic||t.skinet);
+        const subLbl=t.subServicio?`<span style="font-size:.62rem;color:var(--dim)"> \u00b7 ${es(t.subServicio)}</span>`:'';
+        const botonesAct=!cerrada
+          ?`<button class="ab cvt" onclick="cerrarTareaG(${t.id})" title="Marcar trabajo hecho">\u2714</button>`
+          :(esRic&&!t.skinet)
+            ?`<button class="ab" style="background:var(--nali);color:var(--na);border-color:var(--naba)" onclick="marcarSkinetG(${t.id})" title="Registrado en SKINET">\ud83d\udcf1</button>
+              <button class="ab" onclick="reabrirTareaG(${t.id})" title="Reabrir">\u21a9</button>`
+            :`<button class="ab" style="background:var(--veli);color:var(--ve2);border-color:var(--veba)" onclick="archivarTareaG(${t.id})" title="Archivar">\ud83d\uddc3</button>
+              <button class="ab" onclick="reabrirTareaG(${t.id})" title="Reabrir">\u21a9</button>`;
+        html+=`<div class="tcard ${tcls}" style="${cerrada?'opacity:.75;margin-bottom:.32rem':'margin-bottom:.32rem'}">
+          <div class="tcBody">
+            <div style="display:flex;gap:.28rem;flex-wrap:wrap;margin-bottom:.22rem">
+              ${tipoPill}${esRic?skiPill:''}
+            </div>
+            <p style="${cerrada?'text-decoration:line-through;color:var(--dim)':''}">${es(t.descripcion)}${subLbl}</p>
+            ${t.detalle?`<p style="color:var(--dim);font-size:.67rem;margin-top:.15rem">${es(t.detalle)}</p>`:''}
+            <div class="tmeta">${t.fecha||'\u2014'} \u00b7 ${es(t.usuario)}${cerrada&&t.fechaCierre?' \u00b7 Cerrada: '+t.fechaCierre:''}</div>
+          </div>
+          <div class="tcAct">
+            ${botonesAct}
+            <button class="ab" onclick="editR('tarea',${t.id})">\u270f\ufe0f</button>
+            ${puedeArchivar||!cerrada?`<button class="ab" onclick="delR('tarea',${t.id})">\ud83d\uddd1</button>`:''}
+          </div>
+        </div>`;
+      });
+      if(archSrv.length){
+        html+=`<div style="font-size:.65rem;color:var(--dim);margin-bottom:.5rem;padding-left:.3rem">\ud83d\uddc3 ${archSrv.length} archivada${archSrv.length>1?'s':''}: ${archSrv.map(t=>`<button class="ab" style="font-size:.6rem;margin-left:.2rem" onclick="reabrirTareaG(${t.id})" title="Reabrir">\u21a9 ${es(t.descripcion).substring(0,18)}</button>`).join('')}</div>`;
+      }
+    });
+
+    if(!tareas.length&&!tgAbiertas.length&&!comprasGen.length) html=`<div class="emp"><div class="ei">\u2705</div>Sin tareas registradas.<br>Us\u00e1 los botones de arriba para agregar.</div>`;
+    el.innerHTML=html;
+  }catch(e){el.innerHTML=`<div class="emp"><div class="ei">⚠️</div>Error: ${e.message}</div>`}
+}
+
+// ════════════════════════════════════
+// EXPORT TO EXCEL
+// ════════════════════════════════════
+async function exportExcel(tipo){
+  const msg=g('exportMsg');
+  if(msg)msg.textContent='Generando archivo...';
+  try{
+    const wb=XLSX.utils.book_new();
+    const hoy=new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+
+    async function addSheet(name, store, cols, mapper){
+      const rows=await getAll(store);
+      if(!rows.length)return;
+      const data=[cols, ...rows.map(mapper)];
+      const ws=XLSX.utils.aoa_to_sheet(data);
+      // Header style (bold) — basic
+      ws['!cols']=cols.map(()=>({wch:20}));
+      XLSX.utils.book_append_sheet(wb, ws, name);
+    }
+
+    if(tipo==='all'||tipo==='equipos'){
+      await addSheet('Equipos','equipos',
+        ['Descripción','Marca/Modelo','N° Serie','Servicio','Sub Servicio','Tipo Equipo','Estado','Último Mant.','Próx. Mant.','Proveedor','Fecha Compra','Garantía (meses)','Área','Importado','Modificado'],
+        r=>[r.descrip,r.marca,r.serie,r.servicio,r.subServicio,r.tipoEq||'Hospital',r.estado,r.ultimoMant,r.proximoMant,r.proveedor,r.fechaCompra,r.garantiaMeses||12,r.area||'AREA 6',r.importado||'',r.mod||'']
+      );
+    }
+    if(tipo==='all'||tipo==='expedientes'){
+      await addSheet('Expedientes','expedientes',
+        ['N° Expediente','Servicio','Sub Servicio','Descripción','Fecha Inicio','Estado','Responsable','Modificado'],
+        r=>[r.numero,r.servicio,r.subServicio,r.descripcion,r.fechaInicio,r.estado,r.responsable,r.mod||'']
+      );
+    }
+    if(tipo==='all'||tipo==='tareas'){
+      await addSheet('Tareas_RIC01','tareas',
+        ['Tipo','Servicio','Sub Servicio','Descripción','Detalle','SKINET Registrado','Fecha','Usuario'],
+        r=>[r.tipo||'Tarea General',r.servicio,r.subServicio,r.descripcion,r.detalle||'',r.skinet?'SÍ':'NO',r.fecha||'',r.usuario||'']
+      );
+    }
+    if(tipo==='all'||tipo==='ric58'){
+      await addSheet('RIC-58','ric58',
+        ['N° RIC-58','Servicio','Sub Servicio','Descripción','Fecha Envío','Estado','Expediente Generado','Observaciones','Usuario'],
+        r=>[r.numero,r.servicio,r.subServicio,r.descripcion,r.fechaEnvio,r.estado,r.expGenerado||'',r.observaciones||'',r.usuario||'']
+      );
+    }
+    if(tipo==='all'||tipo==='compras'){
+      await addSheet('Compras_OC','compras',
+        ['Descripción','Servicio','Sub Servicio','Tipo','N° OC','Estado OC','Observaciones','Fecha','Usuario'],
+        r=>[r.descripcion,r.servicio,r.subServicio,r.tipo,r.nroc||'',r.estadoOC||'',r.observaciones||'',r.fecha||'',r.usuario||'']
+      );
+    }
+    if(tipo==='all'){
+      await addSheet('Ordenes','ordenes',
+        ['N° Orden','Servicio','Sub Servicio','Descripción','Fecha Inicio','Estado','Responsable'],
+        r=>[r.numero,r.servicio,r.subServicio,r.descripcion,r.fechaInicio,r.estado,r.responsable||'']
+      );
+      await addSheet('Bajas','bajas',
+        ['Equipo','Servicio','Sub Servicio','Motivo','Observaciones','Fecha','Usuario'],
+        r=>[r.equipo,r.servicio,r.subServicio||'',r.motivo,r.observaciones||r.descripcion||'',r.fecha||'',r.usuario||'']
+      );
+      await addSheet('Stock','stock',
+        ['Descripción','Área','Stock','Entradas','Salidas'],
+        r=>[r.descrip,r.area||'AREA 6',r.stock||0,r.cantIn||0,r.cantOut||0]
+      );
+    }
+
+    if(wb.SheetNames.length===0){
+      if(msg)msg.textContent='⚠️ Sin datos para exportar en esa categoría.';
+      return;
+    }
+
+    const nombres={all:'Area6_Completo',equipos:'Area6_Equipos',tareas:'Area6_Tareas_RIC01',expedientes:'Area6_Expedientes',ric58:'Area6_RIC58',compras:'Area6_Compras_OC'};
+    XLSX.writeFile(wb, `${nombres[tipo]||'Area6'}_${hoy}.xlsx`);
+    if(msg)msg.textContent=`✅ Archivo descargado: ${nombres[tipo]}_${hoy}.xlsx`;
+    toast('📥 Excel generado y descargado','ok');
+  }catch(e){
+    if(msg)msg.textContent='⚠️ Error: '+e.message;
+    toast('Error al exportar: '+e.message,'er');
+  }
+}
+
+// ════════════════════════════════════
+// STARTUP
+// ════════════════════════════════════
+(async()=>{
+  try{
+    initPWA();
+    await openDB();
+    const saved=localStorage.getItem('a6u');
+    if(saved){
+      user=JSON.parse(saved);
+      g('loginScr').style.display='none';
+      g('app').style.display='flex';
+      await boot();
+    }
+  }catch(e){
+    document.body.innerHTML=`<div style="color:var(--ro,#d32f2f);padding:1.5rem;font-size:.84rem;max-width:420px;margin:2rem auto;background:#fff;border-radius:12px;border:2px solid #ffd5d5">
+      <b>⚠️ Error: ${e.message}</b><br><br>Abrí la app desde la URL de Vercel (area-6.vercel.app).
+    </div>`;
+  }
+})();
+</script>
+</body>
+</html>
