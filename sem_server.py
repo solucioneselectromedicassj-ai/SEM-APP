@@ -420,7 +420,7 @@ def gen_ecg(d):
 
     # Fila 1: imagen encabezado — ancho ajustado a cols A-G (~487px)
     ws.row_dimensions[1].height = 105
-    _hdr_img(ws, tec, img_w=546, img_h=130, anchor="B1")
+    _hdr_img(ws, tec, img_w=453, img_h=130, anchor="B1")
 
     # Fila 2: título
     ws.row_dimensions[2].height = 18.75
@@ -570,7 +570,7 @@ def gen_monitor(d):
 
     # Fila 1: imagen — ancho ajustado a cols A-H (~550px)
     ws.row_dimensions[1].height = 105
-    _hdr_img(ws, tec, img_w=640, img_h=130, anchor="B1")
+    _hdr_img(ws, tec, img_w=575, img_h=130, anchor="B1")
 
     # Fila 2: título
     ws.row_dimensions[2].height = 18.75
@@ -859,7 +859,7 @@ def gen_presupuesto(d):
         _raw=base64.b64decode(_b64)
         _t=tempfile.NamedTemporaryFile(suffix=".jpg",delete=False)
         _t.write(_raw);_t.flush();_t.close();_TMP.append(_t.name)
-        img=XLImg(_t.name); img.width=491; img.height=130; img.anchor="B1"
+        img=XLImg(_t.name); img.width=502; img.height=130; img.anchor="B1"
         ws.add_image(img)
     except Exception as e: print(f"WARNING logo 491px: {e}")
     ws.row_dimensions[2].height=24.75
@@ -928,7 +928,7 @@ def gen_microscopio(d):
 
     # Fila 1: imagen — ancho ajustado a cols A-G (~487px)
     ws.row_dimensions[1].height = 105
-    _hdr_img(ws, tec, img_w=527, img_h=130, anchor="B1")
+    _hdr_img(ws, tec, img_w=575, img_h=130, anchor="B1")
 
     # Fila 2: título
     ws.row_dimensions[2].height = 18.75
@@ -1132,7 +1132,7 @@ def _gen_calibracion(d, tipo):
         _tmp.write(raw); _tmp.flush(); _tmp.close()
         _TMP.append(_tmp.name)
         img = XLImg(_tmp.name)
-        img.width = 602; img.height = 130; img.anchor = "B1"
+        img.width = 575; img.height = 130; img.anchor = "B1"
         ws.add_image(img)
     except Exception as e:
         print(f"WARNING calibracion logo: {e}")
@@ -1530,6 +1530,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         p = urlparse(self.path).path
+        qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
         data = self.read_json()
         # === TALLER ===
         if p == "/api/equipos":
@@ -1593,98 +1594,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             rows = fetchall(c); conn.close()
             self.send_json(rows)
         # === FINANZAS ===
-        elif p == "/api/finanzas":
-            conn = db(); c = conn.cursor()
-            usr = qs.get("u", [""])[0]
-            if usr and usr != "Pablo Morales":
-                c.execute(qmark("SELECT * FROM finanzas WHERE creado_por=? ORDER BY fecha DESC, id DESC"), (usr,))
-            else:
-                c.execute("SELECT * FROM finanzas ORDER BY fecha DESC, id DESC")
-            rows = fetchall(c); conn.close()
-            self.send_json(rows)
-        # === CLIENTES ===
-        elif p == "/api/clientes":
-            from datetime import datetime
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("INSERT INTO clientes (nombre,institucion,telefono,cuit,situacion_arca,email,direccion,notas,fecha_creacion,creado_por) VALUES (?,?,?,?,?,?,?,?,?,?)"),
-                (data.get("nombre",""),data.get("institucion",""),data.get("telefono",""),
-                 data.get("cuit",""),data.get("situacion_arca",""),
-                 data.get("email",""),data.get("direccion",""),data.get("notas",""),
-                 datetime.now().isoformat(), data.get("creado_por","")))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
-        # === RECORDATORIOS ===
-        elif p == "/api/recordatorios":
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("INSERT INTO recordatorios (cliente_id,equipo,fecha_ultimo,fecha_proximo,notas) VALUES (?,?,?,?,?)"),
-                (data.get("cliente_id"),data.get("equipo",""),data.get("fecha_ultimo",""),
-                 data.get("fecha_proximo",""),data.get("notas","")))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
-        # === PERMISOS ===
-        elif p == "/api/permisos":
-            conn = db(); c = conn.cursor()
-            usuario = data.get("usuario","")
-            secciones = json.dumps(data.get("secciones",{}))
-            c.execute(qmark("SELECT id FROM permisos WHERE usuario_nombre=?"), (usuario,))
-            exists = fetchone(c)
-            if exists:
-                c.execute(qmark("UPDATE permisos SET secciones=? WHERE usuario_nombre=?"), (secciones, usuario))
-            else:
-                c.execute(qmark("INSERT INTO permisos (usuario_nombre,secciones) VALUES (?,?)"), (usuario, secciones))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
-        # === CONFIG ===
-        elif p == "/api/config":
-            conn = db(); c = conn.cursor()
-            for k,v in data.items():
-                c.execute(qmark("SELECT id FROM config WHERE clave=?"), (k,))
-                if fetchone(c):
-                    c.execute(qmark("UPDATE config SET valor=? WHERE clave=?"), (v,k))
-                else:
-                    c.execute(qmark("INSERT INTO config (clave,valor) VALUES (?,?)"), (k,v))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
-        # === PATRONES ===
-        # === HISTORIAL EQUIPOS ===
-        elif p.startswith("/api/historial/"):
-            eid = p.split("/")[-1]
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("SELECT * FROM historial_equipos WHERE equipo_id=? ORDER BY fecha DESC, id DESC"), (eid,))
-            rows = fetchall(c); conn.close()
-            self.send_json(rows)
-        elif p == "/api/historial_cliente":
-            qs = parse_qs(self.path.split("?")[1] if "?" in self.path else "")
-            cliente = qs.get("cliente",[""])[0]
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("SELECT * FROM historial_equipos WHERE cliente=? ORDER BY fecha DESC, id DESC"), (cliente,))
-            rows = fetchall(c); conn.close()
-            self.send_json(rows)
-        # === STOCK ===
-        elif p == "/api/stock":
-            conn = db(); c = conn.cursor()
-            c.execute("SELECT * FROM stock ORDER BY nombre")
-            rows = fetchall(c); conn.close()
-            self.send_json(rows)
-        # === FINANZAS ===
-        elif p == "/api/historial":
-            from datetime import datetime
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("INSERT INTO historial_equipos (equipo_id,cliente,equipo,marca,modelo,serie,fecha,trabajo,tecnico,tipo_trabajo) VALUES (?,?,?,?,?,?,?,?,?,?)"),
-                (data.get("equipo_id"), data.get("cliente",""), data.get("equipo",""),
-                 data.get("marca",""), data.get("modelo",""), data.get("serie",""),
-                 data.get("fecha", datetime.now().strftime("%Y-%m-%d")),
-                 data.get("trabajo",""), data.get("tecnico",""), data.get("tipo_trabajo","reparacion")))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
-        elif p == "/api/patrones":
-            conn = db(); c = conn.cursor()
-            c.execute(qmark("INSERT INTO patrones (tipo,marca_modelo,numero_serie,certificado,fecha_calibracion,fecha_vencimiento,notas) VALUES (?,?,?,?,?,?,?)"),
-                (data.get("tipo",""),data.get("marca_modelo",""),data.get("numero_serie",""),
-                 data.get("certificado",""),data.get("fecha_calibracion",""),
-                 data.get("fecha_vencimiento",""),data.get("notas","")))
-            conn.commit(); conn.close()
-            self.send_bytes(b"ok","text/plain")
         elif p == "/api/finanzas":
             from datetime import datetime
             conn = db(); c = conn.cursor()
