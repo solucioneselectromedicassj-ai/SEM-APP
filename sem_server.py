@@ -744,13 +744,16 @@ def gen_aspirador(d):
         ws.column_dimensions[col].width=w
     # Row 1: logo B1, 575px wide
     ws.row_dimensions[1].height=105
-    _ensure_logos()
     try:
+        import tempfile
         from openpyxl.drawing.image import Image as XLImg
-        path=_LOGO_JON_PATH if tec=="Jonathan" else _LOGO_SEM_PATH
-        img=XLImg(path); img.width=575; img.height=130; img.anchor="B1"
+        _b64=LOGO_HDR_JON_B64 if tec=="Jonathan" else LOGO_HDR_SEM_B64
+        _raw=base64.b64decode(_b64)
+        _t=tempfile.NamedTemporaryFile(suffix=".jpg",delete=False)
+        _t.write(_raw);_t.flush();_t.close();_TMP.append(_t.name)
+        img=XLImg(_t.name); img.width=575; img.height=130; img.anchor="B1"
         ws.add_image(img)
-    except Exception as e: print(f"WARNING logo aspirador: {e}")
+    except Exception as e: print(f"WARNING logo 575px: {e}")
     # Row 2: título
     ws.row_dimensions[2].height=18.75
     ws.merge_cells("B2:H2"); _sc(ws,"B2","Informe de Verificación de Aspiradores",CEL,_font(True,14),_aln("center"))
@@ -842,13 +845,16 @@ def gen_presupuesto(d):
         ws.column_dimensions[col].width=w
     # Row 1: logo B1, 491px wide (cols B-H)
     ws.row_dimensions[1].height=105
-    _ensure_logos()
     try:
+        import tempfile
         from openpyxl.drawing.image import Image as XLImg
-        path=_LOGO_JON_PATH if tec=="Jonathan" else _LOGO_SEM_PATH
-        img=XLImg(path); img.width=491; img.height=130; img.anchor="B1"
+        _b64=LOGO_HDR_JON_B64 if tec=="Jonathan" else LOGO_HDR_SEM_B64
+        _raw=base64.b64decode(_b64)
+        _t=tempfile.NamedTemporaryFile(suffix=".jpg",delete=False)
+        _t.write(_raw);_t.flush();_t.close();_TMP.append(_t.name)
+        img=XLImg(_t.name); img.width=491; img.height=130; img.anchor="B1"
         ws.add_image(img)
-    except Exception as e: print(f"WARNING logo presupuesto: {e}")
+    except Exception as e: print(f"WARNING logo 491px: {e}")
     ws.row_dimensions[2].height=24.75
     ws.merge_cells("B2:H2"); _sc(ws,"B2","PRESUPUESTO",CEL,_font(True,16),_aln("center"))
     for r,(lbl,k) in enumerate([("Equipo","ma"),("Modelo","mo"),("Numero de Serie","se"),("Institucion","inst")],3):
@@ -1112,13 +1118,17 @@ def _gen_calibracion(d, tipo):
     # ── FILA 1: imagen encabezado (105 pt) ────────────────────────────
     ws.row_dimensions[1].height = 105
     try:
-        _ensure_logos()
-        path = _LOGO_JON_PATH if tecnico == "Jonathan" else _LOGO_SEM_PATH
-        img = XLImg(path)
+        import tempfile
+        b64 = LOGO_HDR_JON_B64 if tecnico == "Jonathan" else LOGO_HDR_SEM_B64
+        raw = base64.b64decode(b64)
+        _tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+        _tmp.write(raw); _tmp.flush(); _tmp.close()
+        _TMP.append(_tmp.name)
+        img = XLImg(_tmp.name)
         img.width = 602; img.height = 130; img.anchor = "B1"
         ws.add_image(img)
-    except:
-        pass
+    except Exception as e:
+        print(f"WARNING calibracion logo: {e}")
 
     # ── FILA 2: Título ─────────────────────────────────────────────────
     ws.row_dimensions[2].height = 18.75
