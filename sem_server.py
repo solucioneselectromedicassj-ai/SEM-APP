@@ -342,16 +342,20 @@ def _ensure_logos():
         except Exception as _e: print(f"WARNING logo regen: {_e}")
 
 def _hdr_img(ws, tec, img_w, img_h, anchor="A1"):
-    """Inserta imagen de encabezado según técnico."""
-    _ensure_logos()
+    """Inserta imagen de encabezado según técnico. Escribe fresco cada vez."""
     try:
+        import tempfile
         from openpyxl.drawing.image import Image as XLImg
-        path = _LOGO_JON_PATH if tec == "Jonathan" else _LOGO_SEM_PATH
-        img = XLImg(path)
+        b64 = LOGO_HDR_JON_B64 if tec == "Jonathan" else LOGO_HDR_SEM_B64
+        raw = base64.b64decode(b64)
+        tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+        tmp.write(raw); tmp.flush(); tmp.close()
+        _TMP.append(tmp.name)
+        img = XLImg(tmp.name)
         img.width = img_w; img.height = img_h; img.anchor = anchor
         ws.add_image(img)
-    except:
-        pass
+    except Exception as e:
+        print(f"WARNING _hdr_img: {e}")
 
 CEL  = "FF74BACD"   # celeste SEM
 WHT  = "FFFFFFFF"
