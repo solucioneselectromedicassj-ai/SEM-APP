@@ -196,10 +196,12 @@ def init_db():
         except: pass
 
     # Patrón Uni-T UT320A - Termómetro (certificado CEMEC 55185/26)
-    c.execute(qmark("INSERT OR IGNORE INTO patrones (tipo,marca_modelo,numero_serie,certificado,fecha_calibracion,fecha_vencimiento,notas,informes) SELECT ?,?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM patrones WHERE numero_serie=?)"),
-        ("Termómetro de sonda K/J","Uni-T UT320A","C251220477","CEMEC 55185/26","2026-02-26","2027-02-26",
-         "Rango sonda -50/200°C. No superar 200°C. Hart Scientific A34308 / Lauda LCK / Fluke 701","termometro,estufa,balanza",
-         "C251220477"))
+    try:
+        c.execute(qmark("INSERT INTO patrones (tipo,marca_modelo,numero_serie,certificado,fecha_calibracion,fecha_vencimiento,notas,informes) SELECT ?,?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM patrones WHERE numero_serie=?)"),
+            ("Termómetro de sonda K/J","Uni-T UT320A","C251220477","CEMEC 55185/26","2026-02-26","2027-02-26",
+             "Rango sonda -50/200°C. No superar 200°C. Hart Scientific A34308 / Lauda LCK / Fluke 701","termometro,estufa,balanza",
+             "C251220477"))
+    except Exception: pass  # Already exists or DB not ready yet
     conn.commit(); conn.close()
 
 init_db()
